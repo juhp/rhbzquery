@@ -42,8 +42,8 @@ instance Show BzFields where
 
 data ArgType = ArgProdVer ProductVersion
              | ArgSST String
---             | ArgStatus
-             | ArgParameter
+             | ArgStatus String
+--             | ArgParameter
              | ArgOther String
 --  deriving Eq
 
@@ -53,7 +53,11 @@ readBzQueryParam s =
     Just prodver -> ArgProdVer prodver
     Nothing ->
       if "sst_" `L.isPrefixOf` s then ArgSST s
-      else ArgOther s
+      else
+        let caps = map toUpper s in
+        if caps `elem` statusList
+        then ArgStatus caps
+        else ArgOther s
 
 readProductVersion :: String -> Maybe ProductVersion
 readProductVersion "fedora" = Just (Fedora Nothing)
@@ -64,6 +68,9 @@ readProductVersion ('e':'p':'e':'l':v) | all isDigit v = Just (EPEL (Just (read 
 readProductVersion ('r':'h':'e':'l':ver) = Just $ RHEL (readVersion ver)
 readProductVersion _ = Nothing
 
+statusList :: [String]
+statusList = ["NEW", "ASSIGNED", "POST", "MODIFIED", "ON_QA", "VERIFIED", "RELEASE_PENDING", "CLOSED"]
+
 argToFields :: Natural -> ArgType -> (Natural,[(BzFields,String)])
 argToFields i arg =
   case arg of
@@ -71,6 +78,7 @@ argToFields i arg =
     (ArgSST sst) -> (i+1,[(BzMeta 'f' i,"agile_team.name")
                          ,(BzMeta 'o' i,"equals")
                          ,(BzMeta 'v' i,sst)])
+    (ArgStatus st) -> (i,[(BzStatus,st)])
     (ArgOther c) -> (i,[(BzComponent,c)])
 
 productVersionQuery :: ProductVersion -> [(BzFields,String)]
@@ -100,8 +108,8 @@ brc = "bugzilla.redhat.com"
 run :: [String] -> IO ()
 run args = do
   let params = (numberMetaFields . map readBzQueryParam) args
-      status = (BzStatus, "__open__")
-      query = L.nub $ status : params
+      status = [(BzStatus, "__open__") | not (isStatusSet params)]
+      query = L.nub $ status ++ params
   B.putStrLn $ "https://" <> brc <> "/buglist.cgi" <> renderQuery True (bzQuery query)
 
 bzQuery :: [(BzFields,String)] -> Query
@@ -110,3 +118,8 @@ bzQuery = map (bimap (B.pack . show) (Just . B.pack))
 numberMetaFields :: [ArgType] -> [(BzFields,String)]
 numberMetaFields =
   snd . foldr (\arg (i,flds) -> let (i',fld) = argToFields i arg in (i', flds ++ fld)) (0,[])
+
+isStatusSet :: [(BzFields,String)] -> Bool
+isStatusSet [] = False
+isStatusSet ((BzStatus, _):_) = True
+isStatusSet (_:rest) = isStatusSet rest
