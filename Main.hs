@@ -1,73 +1,112 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-import qualified Data.ByteString.Lazy.Char8 as BL
-import qualified Data.ByteString.Builder as BL
+import Data.Bifunctor
+import qualified Data.ByteString.Char8 as B
+--import qualified Data.ByteString.Builder as BL
+import Data.Char
+import Data.Either
+import qualified Data.List as L
 import Data.Maybe
-import qualified Data.Text as T
+--import qualified Data.Text as T
 import Data.Version.Extra
 import Network.HTTP.Types
+import Numeric.Natural
 #if MIN_VERSION_simple_cmd_args(0,1,7)
 #else
 import Options.Applicative
 #endif
 import SimpleCmdArgs
 import System.FilePath
-import Web.Bugzilla
-import Web.Bugzilla.Search
 
-data ProductVersion = FedoraProduct
-                    | Fedora Int
+data ProductVersion = Fedora (Maybe Natural)
                     | Rawhide
-                    | EPELProduct
-                    | EPEL Int
+                    | EPEL (Maybe Natural)
                     | RHEL Version
 
+data BzFields = BzProduct
+              | BzVersion
+              | BzComponent
+              | BzStatus
+--              | BzFlag String
+              | BzMeta Char Natural
+  deriving Eq
+
+instance Show BzFields where
+  show BzProduct = "product"
+  show BzVersion = "version"
+  show BzComponent = "component"
+  show BzStatus = "bug_status"
+  -- showField (BzFlag f) =
+  show (BzMeta c n) = c: show n
+
+data ArgType = ArgProdVer ProductVersion
+             | ArgSST String
+--             | ArgStatus
+             | ArgParameter
+             | ArgOther String
+--  deriving Eq
+
+readBzQueryParam :: String -> ArgType
+readBzQueryParam s =
+  case readProductVersion s of
+    Just prodver -> ArgProdVer prodver
+    Nothing ->
+      if "sst_" `L.isPrefixOf` s then ArgSST s
+      else ArgOther s
+
 readProductVersion :: String -> Maybe ProductVersion
-readProductVersion "fedora" = Just FedoraProduct
+readProductVersion "fedora" = Just (Fedora Nothing)
 readProductVersion "rawhide" = Just Rawhide
-readProductVersion ('f':ver) = Just $ Fedora $ read ver
-readProductVersion "epel" = Just EPELProduct
-readProductVersion "epel8" = Just $ EPEL 8
-readProductVersion "epel7" = Just $ EPEL 7
-readProductVersion ('r':'h':'e':'l':ver) = Just $ RHEL $ readVersion ver
+readProductVersion ('f':ver) | all isDigit ver = Just $ Fedora (Just (read ver :: Natural))
+readProductVersion "epel" = Just (EPEL Nothing)
+readProductVersion ('e':'p':'e':'l':v) | all isDigit v = Just (EPEL (Just (read v :: Natural)))
+readProductVersion ('r':'h':'e':'l':ver) = Just $ RHEL (readVersion ver)
 readProductVersion _ = Nothing
 
-productVersionQuery :: ProductVersion -> SearchExpression
-productVersionQuery FedoraProduct = ProductField .==. "Fedora"
-productVersionQuery Rawhide = ProductField .==. "Fedora" .&&.
-                              VersionField .==. "rawhide"
-productVersionQuery (Fedora n) = ProductField .==. "Fedora" .&&.
-                                 VersionField .==. T.pack (show n)
-productVersionQuery EPELProduct = ProductField .==. "Fedora EPEL"
-productVersionQuery (EPEL n) = ProductField .==. "Fedora EPEL" .&&.
-                               VersionField .==. T.pack (show n)
+argToFields :: Natural -> ArgType -> (Natural,[(BzFields,String)])
+argToFields i arg =
+  case arg of
+    (ArgProdVer prodver) -> (i,productVersionQuery prodver)
+    (ArgSST sst) -> (i+1,[(BzMeta 'f' i,"agile_team.name")
+                         ,(BzMeta 'o' i,"equals")
+                         ,(BzMeta 'v' i,sst)])
+    (ArgOther c) -> (i,[(BzComponent,c)])
+
+productVersionQuery :: ProductVersion -> [(BzFields,String)]
+productVersionQuery (Fedora Nothing) = [(BzProduct, "Fedora")]
+productVersionQuery Rawhide = [(BzProduct, "Fedora")
+                              ,(BzVersion, "rawhide")]
+productVersionQuery (Fedora (Just n)) = [(BzProduct, "Fedora")
+                                        ,(BzVersion, show n)]
+productVersionQuery (EPEL Nothing) = [(BzProduct, "Fedora EPEL")]
+productVersionQuery (EPEL (Just n)) = [(BzProduct, "Fedora EPEL")
+                                      ,(BzVersion, show n)]
 productVersionQuery (RHEL ver) =
   case versionBranch ver of
     [] -> error "Can't search RHEL without version"
-    [major] ->
-      ProductField .==. "Red Hat Enterprise Linux " <> T.pack (show major)
-    (major:minor) ->
-      ProductField .==. "Red Hat Enterprise Linux " <> T.pack (show major) .&&.
-      VersionField .==. T.pack (showVersion ver)
+    [major] -> [(BzProduct, "Red Hat Enterprise Linux " ++ show major)]
+    (major:_) ->  [(BzProduct, "Red Hat Enterprise Linux " ++ show major)
+                  ,(BzVersion, showVersion ver)]
 
 main :: IO ()
 main = simpleCmdArgs Nothing "Bugzilla query tool"
        "Tool for query bugzilla" $
-       run <$> productVersionArg <*> strArg "PACKAGE"
-  where
-    productVersionArg :: Parser (Maybe ProductVersion)
-    productVersionArg = optional (argumentWith (maybeReader readProductVersion) "ProductVersion")
+       run <$> some (strArg "QUERY")
 
---brc :: T.Text
+brc :: B.ByteString
 brc = "bugzilla.redhat.com"
 
-run :: Maybe ProductVersion -> String -> IO ()
-run mprodVer pkg = do
-  let mprodVerQ = productVersionQuery <$> mprodVer
-      component = ComponentField .==. [T.pack pkg]
-      status = StatusField .==. "__open__"
-      query = case mprodVerQ of
-        Nothing -> status .&&. component
-        Just prodver -> prodver .&&. status .&&. component
-  BL.putStrLn $ "https://" <> brc <> "/buglist.cgi" <> BL.toLazyByteString (renderQueryText True (evalSearchExpr query))
+run :: [String] -> IO ()
+run args = do
+  let params = (numberMetaFields . map readBzQueryParam) args
+      status = (BzStatus, "__open__")
+      query = L.nub $ status : params
+  B.putStrLn $ "https://" <> brc <> "/buglist.cgi" <> renderQuery True (bzQuery query)
+
+bzQuery :: [(BzFields,String)] -> Query
+bzQuery = map (bimap (B.pack . show) (Just . B.pack))
+
+numberMetaFields :: [ArgType] -> [(BzFields,String)]
+numberMetaFields =
+  snd . foldr (\arg (i,flds) -> let (i',fld) = argToFields i arg in (i', flds ++ fld)) (0,[])
