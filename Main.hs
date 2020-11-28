@@ -5,9 +5,7 @@ import Data.Bifunctor
 import qualified Data.ByteString.Char8 as B
 --import qualified Data.ByteString.Builder as BL
 import Data.Char
-import Data.Either
 import qualified Data.List as L
-import Data.Maybe
 --import qualified Data.Text as T
 import Data.Version.Extra
 import Network.HTTP.Types
@@ -17,7 +15,6 @@ import Numeric.Natural
 import Options.Applicative
 #endif
 import SimpleCmdArgs
-import System.FilePath
 
 data ProductVersion = Fedora (Maybe Natural)
                     | Rawhide
