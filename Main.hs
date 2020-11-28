@@ -97,7 +97,7 @@ productVersionQuery (RHEL ver) =
 main :: IO ()
 main = simpleCmdArgs Nothing "Bugzilla query tool"
        "Tool for query bugzilla" $
-       run <$> some (strArg "QUERY")
+       run <$> some (strArg "[COMPONENT|STATUS|PRODUCTVERSION]...")
 
 brc :: B.ByteString
 brc = "bugzilla.redhat.com"
