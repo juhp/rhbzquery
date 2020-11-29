@@ -22,18 +22,20 @@ import Paths_bzquery
 import User
 
 main :: IO ()
-main =
-  simpleCmdArgsWithMods (Just version) (fullDesc <> header "Bugzilla query tool" <> progDescDoc (Just detailedHelp)) $
-  run <$>
-  switchWith 'n' "dryrun" "no browser or query" <*>
-  switchWith 'm' "mine" "My bugs" <*>
-  some (strArg argHelp)
+main = do
+  muser <- maybeBzUser
+  let redhat = maybe False ("@redhat.com" `L.isSuffixOf`) muser
+  simpleCmdArgsWithMods (Just version) (fullDesc <> header "Bugzilla query tool" <> progDescDoc (Just (detailedHelp redhat))) $
+    run muser <$>
+    switchWith 'n' "dryrun" "no browser or query" <*>
+    switchWith 'm' "mine" "My bugs" <*>
+    some (strArg argHelp)
   where
-    run :: Bool -> Bool -> [String] -> IO ()
-    run dryrun mine args = do
+    run :: Maybe String -> Bool -> Bool -> [String] -> IO ()
+    run muser dryrun mine args = do
       user <- if mine
         then do
-        mail <- getBzUser
+        mail <- maybe getBzUser return muser
         return [(BzParameter "assigned_to", mail)]
         else return []
       let params = (numberMetaFields . map readBzQueryParam) args
