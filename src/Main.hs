@@ -4,6 +4,7 @@
 import Control.Monad.Extra
 import Data.Bifunctor
 import qualified Data.ByteString.Char8 as B
+import Data.Maybe
 import qualified Data.List as L
 import Network.HTTP.Types
 import Options.Applicative (fullDesc, header, progDescDoc,
@@ -37,7 +38,7 @@ main =
         mail <- getBzUser
         return [(BzParameter "assigned_to", mail)]
         else return []
-      let params = (numberMetaFields . map readBzQueryParam) args
+      let params = (numberMetaFields . mapMaybe readBzQueryParam) args
           status = [(BzStatus, "__open__") | not (isStatusSet params)]
           query = L.nub $ user ++ status ++ params
           url = "https://" <> B.pack brc <> "/buglist.cgi" <> renderQuery True (bzQuery query)

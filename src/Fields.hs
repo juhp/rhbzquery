@@ -41,12 +41,11 @@ argToFields :: Natural -> ArgType -> (Natural,[(BzFields,String)])
 argToFields i arg =
   case arg of
     ArgProdVer prodver -> (i,productVersionQuery prodver)
-    ArgSST sst ->
+    ArgStatus st -> (i,[(BzStatus,st)])
+    ArgParameter "sst" v ->
       (i+1,[(BzMeta 'f' i, mapComplex "sst")
            ,(BzMeta 'o' i, "substr")
-           ,(BzMeta 'v' i, sst)])
-    ArgParameter "sst" v -> argToFields i (ArgSST ("sst_" ++ v))
-    ArgStatus st -> (i,[(BzStatus,st)])
+           ,(BzMeta 'v' i, "sst_" ++ v)])
     ArgParameter param v ->
       let p = mapComplex param
       in if '.' `elem` p

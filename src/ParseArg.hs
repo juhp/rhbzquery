@@ -6,6 +6,7 @@ module ParseArg (
   )
 where
 
+import Control.Applicative ((<|>))
 import Data.Char
 import Data.List.Extra as L
 import Data.Version.Extra
@@ -15,25 +16,17 @@ argHelp :: String
 argHelp = "[COMPONENT|STATUS|PRODUCTVERSION|FIELD=VALUE]..."
 
 data ArgType = ArgProdVer ProductVersion
-             | ArgSST String
              | ArgStatus String
              | ArgParameter String String
              | ArgOther String
 --  deriving Eq
 
-readBzQueryParam :: String -> ArgType
+readBzQueryParam :: String -> Maybe ArgType
 readBzQueryParam s =
-  case readProductVersion s of
-    Just prodver -> ArgProdVer prodver
-    Nothing ->
-      if "sst_" `L.isPrefixOf` s then ArgSST s
-      else
-        let caps = upper s in
-        if caps `elem` statusList
-        then ArgStatus caps
-        else case parseParam s of
-               Just (p,v) -> ArgParameter p v
-               Nothing -> ArgOther s
+  ArgProdVer <$> readProductVersion s <|>
+  ArgStatus <$> parseStatus s <|>
+  parseParam s <|>
+  pure (ArgOther s)
 
 data ProductVersion = Fedora (Maybe Natural)
                     | Rawhide
@@ -49,13 +42,14 @@ readProductVersion ('e':'p':'e':'l':v) | all isDigit v = Just (EPEL (Just (read 
 readProductVersion ('r':'h':'e':'l':ver) = Just $ RHEL (readVersion ver)
 readProductVersion _ = Nothing
 
-statusList :: [String]
-statusList = ["NEW", "ASSIGNED", "POST", "MODIFIED", "ON_QA", "VERIFIED", "RELEASE_PENDING", "CLOSED"]
+parseStatus :: String -> Maybe String
+parseStatus s =
+  find (== upper s) ["NEW", "ASSIGNED", "POST", "MODIFIED", "ON_QA", "VERIFIED", "RELEASE_PENDING", "CLOSED"]
 
-parseParam :: String -> Maybe (String,String)
+parseParam :: String -> Maybe ArgType
 parseParam ps =
   case splitOn "=" ps of
     [a,b] -> if null a || null b
              then error $ "bad parameter: " ++ ps
-             else Just (a,b)
+             else Just (ArgParameter a b)
     _ -> Nothing
