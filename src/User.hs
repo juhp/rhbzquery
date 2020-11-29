@@ -21,7 +21,7 @@ eitherBzUser = do
   let rc = home </> ".bugzillarc"
   -- FIXME assumption if file exists then it has b.r.c user
   ifM (doesFileExist rc)
-    (Right <$> readIniConfig rc rcParser id) $
+    (Right <$> readIniConfig rc rcParser id)
     (return $ Left rc)
   where
     rcParser :: IniParser String

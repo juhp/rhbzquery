@@ -6,10 +6,11 @@ import Data.Bifunctor
 import qualified Data.ByteString.Char8 as B
 import qualified Data.List as L
 import Network.HTTP.Types
-import Options.Applicative (fullDesc, header, progDescDoc)
+import Options.Applicative (fullDesc, header, progDescDoc,
 #if !MIN_VERSION_simple_cmd_args(0,1,4)
-import Options.Applicative(some)
+                            some
 #endif
+  )
 import SimpleCmd
 import SimpleCmdArgs
 import System.Directory
