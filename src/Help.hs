@@ -3,12 +3,16 @@ where
 
 import qualified Options.Applicative.Help.Pretty as P
 
+import ParseArg (statusList)
+
 detailedHelp :: P.Doc
 detailedHelp =
   P.vcat
   [ P.text "Tool for generating bugzilla queries"
   , P.empty
   , P.text "FIELDS = " <> P.lbrace <> P.align (P.fillCat (P.punctuate P.comma (map P.text allBzFields)) <> P.rbrace)
+  , P.empty
+  , P.text "STATUS = " <> P.lbrace <> P.align (P.fillCat (P.punctuate P.comma (map P.text (statusList ++ ["ALL"]))) <> P.rbrace)
   ]
 
 -- FIXME: filter by @redhat.com

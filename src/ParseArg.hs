@@ -2,7 +2,8 @@ module ParseArg (
   argHelp,
   readBzQueryArg,
   ArgType(..),
-  ProductVersion(..)
+  ProductVersion(..),
+  statusList
   )
 where
 
