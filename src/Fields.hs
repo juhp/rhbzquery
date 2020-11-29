@@ -31,28 +31,27 @@ mapFields "itr" = "cf_internal_target_release"
 mapFields "verified" = "cf_verified"
 mapFields s = s
 
-mapComplex :: String -> (String,String)
-mapComplex "sst" = ("agile_team.name","equals")
-mapComplex "flag" = ("flagtypes.name","substr")
-mapComplex "flags" = ("flagtypes.name","substr")
-mapComplex p = (p,"equals")
+mapComplex :: String -> String
+mapComplex "sst" = "agile_team.name"
+mapComplex "flag" = "flagtypes.name"
+mapComplex "flags" = "flagtypes.name"
+mapComplex p = p
 
--- FIXME support sst=name (map sst=name to sst_name)?
 argToFields :: Natural -> ArgType -> (Natural,[(BzFields,String)])
 argToFields i arg =
   case arg of
     ArgProdVer prodver -> (i,productVersionQuery prodver)
     ArgSST sst ->
-      let (p,o) = mapComplex "sst"
-      in (i+1,[(BzMeta 'f' i, p)
-              ,(BzMeta 'o' i, o)
-              ,(BzMeta 'v' i, sst)])
+      (i+1,[(BzMeta 'f' i, mapComplex "sst")
+           ,(BzMeta 'o' i, "substr")
+           ,(BzMeta 'v' i, sst)])
+    ArgParameter "sst" v -> argToFields i (ArgSST ("sst_" ++ v))
     ArgStatus st -> (i,[(BzStatus,st)])
     ArgParameter param v ->
-      let (p,o) = mapComplex param
+      let p = mapComplex param
       in if '.' `elem` p
          then (i+1,[(BzMeta 'f' i, p)
-                   ,(BzMeta 'o' i, o)
+                   ,(BzMeta 'o' i, "substr")
                    ,(BzMeta 'v' i, v)])
          else (i,[(BzParameter p, v)])
     ArgOther c -> (i,[(BzComponent,c)])
