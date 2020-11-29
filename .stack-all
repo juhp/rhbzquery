@@ -1,3 +1,3 @@
 [versions]
-# reason comment
+# Variable not in scope: (<>) :: P.Doc -> P.Doc -> t0
 oldest = lts-12
