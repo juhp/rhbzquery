@@ -1,4 +1,4 @@
-name:                bzquery
+name:                rhbzquery
 version:             0.1.0
 synopsis:            Bugzilla query tool
 -- description:
@@ -14,20 +14,19 @@ category:            Utils
 build-type:          Simple
 extra-doc-files:     ChangeLog.md
 cabal-version:       1.18
---tested-with:         GHC == 8.4.4, GHC == 8.6.5,  GHC == 8.8.4, GHC == 8.10.2
+tested-with:         GHC == 8.4.4, GHC == 8.6.5,  GHC == 8.8.4, GHC == 8.10.2
 
---source-repository head
---  type:                git
---  location:            https://github.com/juhp/tmp.git
+source-repository head
+  type:                git
+  location:            https://github.com/juhp/rhbzquery.git
 
-
-executable bzquery
+executable rhbzquery
   main-is:             Main.hs
   other-modules:       Bugzilla
                        Fields
                        Help
                        ParseArg
-                       Paths_bzquery
+                       Paths_rhbzquery
                        User
   -- other-extensions:
   build-depends:       base <5

@@ -19,7 +19,7 @@ import Bugzilla
 import Fields
 import Help
 import ParseArg
-import Paths_bzquery
+import Paths_rhbzquery
 import User
 
 main :: IO ()
