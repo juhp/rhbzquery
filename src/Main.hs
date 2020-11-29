@@ -27,7 +27,7 @@ main :: IO ()
 main =
   simpleCmdArgsWithMods (Just version) (fullDesc <> header "Bugzilla query tool" <> progDescDoc (Just detailedHelp)) $
   run <$>
-  switchWith 'n' "dryrun" "no browser or query" <*>
+  switchWith 'n' "dryrun" "Do not open url" <*>
   switchWith 'm' "mine" "My bugs" <*>
   some (strArg argHelp)
   where
