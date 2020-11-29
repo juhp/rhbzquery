@@ -36,11 +36,11 @@ main =
       user <- if mine
         then do
         mail <- getBzUser
-        return [(BzParameter "assigned_to", mail)]
+        return [ArgParameter "assigned_to" mail]
         else return []
-      let params = (numberMetaFields . mapMaybe readBzQueryParam) args
-          status = [(BzStatus, "__open__") | not (isStatusSet params)]
-          query = L.nub $ user ++ status ++ params
+      let argtypes = mapMaybe readBzQueryArg args
+          status = [ArgParameter "bug_status" "__open__" | not (hasStatusSet argtypes)]
+          query = L.nub $ numberMetaFields $ status ++ user ++ argtypes
           url = "https://" <> B.pack brc <> "/buglist.cgi" <> renderQuery True (bzQuery query)
       -- FIXME check xdg-open available
       unless dryrun $ do
@@ -48,14 +48,16 @@ main =
           cmd_ xdgOpen [B.unpack url]
       B.putStrLn url
 
-    bzQuery :: [(BzFields,String)] -> Query
-    bzQuery = map (bimap (B.pack . show) (Just . B.pack))
+    hasStatusSet :: [ArgType] -> Bool
+    hasStatusSet [] = False
+    hasStatusSet (ArgStatusAll:_) = True
+    hasStatusSet ((ArgParameter "bug_status" _):_) = True
+    hasStatusSet ((ArgParameter "status" _):_) = True
+    hasStatusSet (_:rest) = hasStatusSet rest
 
     numberMetaFields :: [ArgType] -> [(BzFields,String)]
     numberMetaFields =
       snd . foldr (\arg (i,flds) -> let (i',fld) = argToFields i arg in (i', fld ++ flds)) (0,[])
 
-    isStatusSet :: [(BzFields,String)] -> Bool
-    isStatusSet [] = False
-    isStatusSet ((BzStatus, _):_) = True
-    isStatusSet (_:rest) = isStatusSet rest
+    bzQuery :: [(BzFields,String)] -> Query
+    bzQuery = map (bimap (B.pack . show) (Just . B.pack))

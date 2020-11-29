@@ -12,7 +12,6 @@ import ParseArg (ArgType(..), ProductVersion(..))
 data BzFields = BzProduct
               | BzVersion
               | BzComponent
-              | BzStatus
               | BzParameter String
               | BzMeta Char Natural
   deriving Eq
@@ -21,13 +20,13 @@ instance Show BzFields where
   show BzProduct = "product"
   show BzVersion = "version"
   show BzComponent = "component"
-  show BzStatus = "bug_status"
   show (BzParameter f) = mapFields f
   show (BzMeta c n) = c: show n
 
 mapFields :: String -> String
 mapFields "itm" = "cf_internal_target_milestone"
 mapFields "itr" = "cf_internal_target_release"
+mapFields "status" = "bug_status"
 mapFields "verified" = "cf_verified"
 mapFields s = s
 
@@ -41,7 +40,7 @@ argToFields :: Natural -> ArgType -> (Natural,[(BzFields,String)])
 argToFields i arg =
   case arg of
     ArgProdVer prodver -> (i,productVersionQuery prodver)
-    ArgStatus st -> (i,[(BzStatus,st)])
+    ArgStatusAll  -> (i,[])
     ArgParameter "sst" v ->
       (i+1,[(BzMeta 'f' i, mapComplex "sst")
            ,(BzMeta 'o' i, "substr")

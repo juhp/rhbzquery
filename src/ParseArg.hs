@@ -1,6 +1,6 @@
 module ParseArg (
   argHelp,
-  readBzQueryParam,
+  readBzQueryArg,
   ArgType(..),
   ProductVersion(..)
   )
@@ -16,15 +16,14 @@ argHelp :: String
 argHelp = "[COMPONENT|STATUS|PRODUCTVERSION|FIELD=VALUE]..."
 
 data ArgType = ArgProdVer ProductVersion
-             | ArgStatus String
+             | ArgStatusAll
              | ArgParameter String String
              | ArgOther String
---  deriving Eq
 
-readBzQueryParam :: String -> Maybe ArgType
-readBzQueryParam s =
+readBzQueryArg :: String -> Maybe ArgType
+readBzQueryArg s =
   ArgProdVer <$> readProductVersion s <|>
-  ArgStatus <$> parseStatus s <|>
+  parseStatus s <|>
   parseParam s <|>
   pure (ArgOther s)
 
@@ -42,9 +41,16 @@ readProductVersion ('e':'p':'e':'l':v) | all isDigit v = Just (EPEL (Just (read 
 readProductVersion ('r':'h':'e':'l':ver) = Just $ RHEL (readVersion ver)
 readProductVersion _ = Nothing
 
-parseStatus :: String -> Maybe String
+statusList :: [String]
+statusList = ["NEW", "ASSIGNED", "POST", "MODIFIED", "ON_QA", "VERIFIED", "RELEASE_PENDING", "CLOSED"]
+
+parseStatus :: String -> Maybe ArgType
 parseStatus s =
-  find (== upper s) ["NEW", "ASSIGNED", "POST", "MODIFIED", "ON_QA", "VERIFIED", "RELEASE_PENDING", "CLOSED"]
+  let caps = upper s in
+    if caps == "ALL"
+    then Just ArgStatusAll
+    else
+      ArgParameter "bug_status" <$> find (== upper s) statusList
 
 parseParam :: String -> Maybe ArgType
 parseParam ps =
