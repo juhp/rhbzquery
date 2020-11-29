@@ -1,4 +1,5 @@
 module ParseArg (
+  argHelp,
   readBzQueryParam,
   ArgType(..),
   ProductVersion(..)
@@ -9,6 +10,9 @@ import Data.Char
 import Data.List.Extra as L
 import Data.Version.Extra
 import Numeric.Natural
+
+argHelp :: String
+argHelp = "[COMPONENT|STATUS|PRODUCTVERSION|FIELD=VALUE]..."
 
 data ArgType = ArgProdVer ProductVersion
              | ArgSST String
