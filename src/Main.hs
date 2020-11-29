@@ -44,7 +44,7 @@ main =
 
     numberMetaFields :: [ArgType] -> [(BzFields,String)]
     numberMetaFields =
-      snd . foldr (\arg (i,flds) -> let (i',fld) = argToFields i arg in (i', flds ++ fld)) (0,[])
+      snd . foldr (\arg (i,flds) -> let (i',fld) = argToFields i arg in (i', fld ++ flds)) (0,[])
 
     isStatusSet :: [(BzFields,String)] -> Bool
     isStatusSet [] = False
