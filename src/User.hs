@@ -1,12 +1,10 @@
 module User (
-  getBzUser,
-  maybeBzUser
+  getBzUser
   )
 where
 
 import Control.Monad.Extra
 import qualified Data.ByteString.Char8 as B
-import Data.Either.Extra
 import Data.Ini.Config
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
@@ -16,10 +14,6 @@ import System.FilePath
 import qualified Text.Email.Validate as Email
 
 import Bugzilla
-
-maybeBzUser :: IO (Maybe String)
-maybeBzUser =
-  eitherToMaybe <$> eitherBzUser
 
 eitherBzUser :: IO (Either FilePath String)
 eitherBzUser = do
