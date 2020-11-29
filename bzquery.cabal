@@ -23,13 +23,18 @@ cabal-version:       1.18
 
 executable bzquery
   main-is:             Main.hs
-  other-modules:       Fields
+  other-modules:       Bugzilla
+                       Fields
                        Help
                        ParseArg
                        Paths_bzquery
+                       User
   -- other-extensions:
   build-depends:       base <5
                      , bytestring
+                     , config-ini
+                     , directory
+                     , email-validate
                      , extra
                      , filepath
                      , http-types

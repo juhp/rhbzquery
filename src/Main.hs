@@ -1,7 +1,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-import Control.Monad
+import Control.Monad.Extra
 import Data.Bifunctor
 import qualified Data.ByteString.Char8 as B
 import qualified Data.List as L
@@ -12,14 +12,14 @@ import Options.Applicative(some)
 #endif
 import SimpleCmd
 import SimpleCmdArgs
+import System.Directory
 
+import Bugzilla
 import Fields
 import Help
 import ParseArg
 import Paths_bzquery
-
-brc :: B.ByteString
-brc = "bugzilla.redhat.com"
+import User
 
 main :: IO ()
 main =
@@ -30,13 +30,20 @@ main =
   some (strArg argHelp)
   where
     run :: Bool -> Bool -> [String] -> IO ()
-    run dryrun _mine args = do
+    run dryrun mine args = do
+      user <- if mine
+        then do
+        mail <- getBzUser
+        return [(BzParameter "assigned_to", mail)]
+        else return []
       let params = (numberMetaFields . map readBzQueryParam) args
           status = [(BzStatus, "__open__") | not (isStatusSet params)]
-          query = L.nub $ status ++ params
-          url = "https://" <> brc <> "/buglist.cgi" <> renderQuery True (bzQuery query)
-      unless dryrun $
-        cmd_ "xdg-open" [B.unpack url]
+          query = L.nub $ user ++ status ++ params
+          url = "https://" <> B.pack brc <> "/buglist.cgi" <> renderQuery True (bzQuery query)
+      -- FIXME check xdg-open available
+      unless dryrun $ do
+        whenJustM (findExecutable "xdg-open") $ \xdgOpen ->
+          cmd_ xdgOpen [B.unpack url]
       B.putStrLn url
 
     bzQuery :: [(BzFields,String)] -> Query
