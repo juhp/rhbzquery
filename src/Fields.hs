@@ -32,6 +32,7 @@ mapFields s = s
 
 mapComplex :: String -> String
 mapComplex "sst" = "agile_team.name"
+mapComplex "summary" = "short_desc"
 mapComplex "flag" = "flagtypes.name"
 mapComplex "flags" = "flagtypes.name"
 mapComplex p = p
@@ -45,6 +46,10 @@ argToFields i arg =
       (i+1,[(BzMeta 'f' i, mapComplex "sst")
            ,(BzMeta 'o' i, "substr")
            ,(BzMeta 'v' i, "sst_" ++ v)])
+    ArgParameter "summary" v ->
+      (i+1,[(BzMeta 'f' i, mapComplex "summary")
+           ,(BzMeta 'o' i, "substr")
+           ,(BzMeta 'v' i, v)])
     ArgParameter param v ->
       let p = mapComplex param
       in if '.' `elem` p
