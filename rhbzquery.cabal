@@ -1,18 +1,19 @@
 name:                rhbzquery
 version:             0.1.0
 synopsis:            Bugzilla query tool
--- description:
--- bug-reports:
+description:
+        A tool for creating bugzilla queries targeting bugzilla.redhat.com.
 license:             BSD3
 license-file:        LICENSE
 author:              Jens Petersen
 maintainer:          petersen@redhat.com
 copyright:           2020  Jens Petersen <petersen@redhat.com>
 category:            Utils
---homepage:            https://github.com/juhp/tmp
---bug-reports:         https://github.com/juhp/tmp/issues
+homepage:            https://github.com/juhp/rhbzquery
+bug-reports:         https://github.com/juhp/rhbzquery/issues
 build-type:          Simple
 extra-doc-files:     ChangeLog.md
+                     README.md
 cabal-version:       1.18
 tested-with:         GHC == 8.4.4, GHC == 8.6.5,  GHC == 8.8.4, GHC == 8.10.2
 
@@ -28,7 +29,6 @@ executable rhbzquery
                        ParseArg
                        Paths_rhbzquery
                        User
-  -- other-extensions:
   build-depends:       base <5
                      , bytestring
                      , config-ini

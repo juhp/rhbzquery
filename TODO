@@ -1,0 +1,9 @@
+- copy url to clipboard
+- tui bug browser
+- help: --fields-matching
+- contains with ~
+- regexp with =~
+- testsuite
+- use NOT Closed ?
+- --rest: to create rest api urls
+- cc=me, reporter=me
