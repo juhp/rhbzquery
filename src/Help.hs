@@ -13,6 +13,8 @@ detailedHelp =
   , P.text "FIELDS = " <> P.lbrace <> P.align (P.fillCat (P.punctuate P.comma (map P.text allBzFields)) <> P.rbrace)
   , P.empty
   , P.text "STATUS = " <> P.lbrace <> P.align (P.fillCat (P.punctuate P.comma (map P.text (statusList ++ ["ALL"]))) <> P.rbrace)
+  , P.empty
+  , P.text "See https://github.com/juhp/rhbzquery#readme for examples"
   ]
 
 -- FIXME: filter by @redhat.com
