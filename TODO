@@ -3,7 +3,9 @@
 - help: --fields-matching
 - contains with ~
 - regexp with =~
-- testsuite
 - use NOT Closed ?
 - --rest: to create rest api urls
 - cc=me, reporter=me
+- config file: for defining "my team" etc
+- --help: only show most important fields
+  --help-all for all
