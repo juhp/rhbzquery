@@ -14,4 +14,3 @@ install:
 - cabal update
 script:
 - cabal build
-- cabal test
