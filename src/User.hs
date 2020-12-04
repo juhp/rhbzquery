@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 module User (
   getBzUser
   )
@@ -5,6 +7,9 @@ where
 
 import Control.Monad.Extra
 import qualified Data.ByteString.Char8 as B
+#if !MIN_VERSION_base(4,11,0)
+import Data.Monoid ((<>))
+#endif
 import Data.Ini.Config
 import qualified Data.Text as T
 import qualified Data.Text.IO as T

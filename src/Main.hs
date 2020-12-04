@@ -5,6 +5,9 @@ import Control.Monad.Extra
 import Data.Bifunctor
 import qualified Data.ByteString.Char8 as B
 import Data.Maybe
+#if !MIN_VERSION_base(4,11,0)
+import Data.Monoid ((<>))
+#endif
 import qualified Data.List as L
 import Network.HTTP.Types
 import Options.Applicative (fullDesc, header, progDescDoc,
