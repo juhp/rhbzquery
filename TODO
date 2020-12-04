@@ -9,3 +9,4 @@
 - config file: for defining "my team" etc
 - --help: only show most important fields
   --help-all for all
+- --count bugs

@@ -1,8 +1,8 @@
 name:                rhbzquery
-version:             0.1.0
+version:             0.1.1
 synopsis:            Bugzilla query tool
 description:
-        A tool for creating bugzilla queries targeting bugzilla.redhat.com.
+        A CLI tool for creating bugzilla queries for bugzilla.redhat.com.
 license:             BSD3
 license-file:        LICENSE
 author:              Jens Petersen
@@ -15,7 +15,7 @@ build-type:          Simple
 extra-doc-files:     ChangeLog.md
                      README.md
 cabal-version:       1.18
-tested-with:         GHC == 8.4.4, GHC == 8.6.5,  GHC == 8.8.4, GHC == 8.10.2
+tested-with:         GHC == 8.4.4, GHC == 8.6.5, GHC == 8.8.4, GHC == 8.10.2
 
 source-repository head
   type:                git
