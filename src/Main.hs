@@ -32,24 +32,29 @@ main =
   run <$>
   switchWith 'n' "dryrun" "Do not open url" <*>
   switchWith 'm' "mine" "My bugs" <*>
+  switchWith 'f' "file" "File a bug" <*>
   some (strArg argHelp)
   where
-    run :: Bool -> Bool -> [String] -> IO ()
-    run dryrun mine args = do
-      user <- if mine
+    run :: Bool -> Bool -> Bool -> [String] -> IO ()
+    run dryrun mine file args = do
+      user <- if mine && not file
         then do
         mail <- getBzUser
         return [ArgParameter "assigned_to" mail]
         else return []
       let argtypes = mapMaybe readBzQueryArg args
-          status = [ArgParameter "bug_status" "__open__" | not (hasStatusSet argtypes)]
-          query = L.nub $ numberMetaFields $ status ++ user ++ argtypes
-          url = "https://" <> B.pack brc <> "/buglist.cgi" <> renderQuery True (bzQuery query)
-      -- FIXME check xdg-open available
+          url = if file
+            then
+            let query = L.nub $ concatMap argToSimpleField argtypes
+            in "https://" <> B.pack brc <> "/enter_bug.cgi" <> renderQuery True (bzQuery query)
+            else
+            let status = [ArgParameter "bug_status" "__open__" | not (hasStatusSet argtypes)]
+                query = L.nub $ numberMetaFields $ status ++ user ++ argtypes
+            in "https://" <> B.pack brc <> "/buglist.cgi" <> renderQuery True (bzQuery query)
+      B.putStrLn url
       unless dryrun $ do
         whenJustM (findExecutable "xdg-open") $ \xdgOpen ->
           cmd_ xdgOpen [B.unpack url]
-      B.putStrLn url
 
     hasStatusSet :: [ArgType] -> Bool
     hasStatusSet [] = False

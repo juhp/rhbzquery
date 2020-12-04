@@ -1,6 +1,7 @@
 module Fields (
   BzFields(..),
-  argToFields
+  argToFields,
+  argToSimpleField
   )
 where
 
@@ -36,6 +37,16 @@ mapComplex "summary" = "short_desc"
 mapComplex "flag" = "flagtypes.name"
 mapComplex "flags" = "flagtypes.name"
 mapComplex p = p
+
+argToSimpleField :: ArgType -> [(BzFields,String)]
+argToSimpleField (ArgProdVer prodver) =
+  productVersionQuery prodver
+argToSimpleField (ArgParameter p v) =
+  [(BzParameter (mapComplex p), v)]
+argToSimpleField (ArgOther c) =
+  [(BzComponent,c)]
+-- FIXME or error for "all"?
+argToSimpleField _ = []
 
 argToFields :: Natural -> ArgType -> (Natural,[(BzFields,String)])
 argToFields i arg =
