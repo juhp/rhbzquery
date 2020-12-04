@@ -8,22 +8,24 @@ and if xdg-open is available will try to open the url
 
 ## Usage examples
 
-`rhbzquery --mine`: your open bugs (reads `.bugzillarc`)
+`rhbzquery f33 xyz` : F33 bugs for package xyz
 
-`rhbzquery f33 xyz`: F33 bugs for package xyz
+`rhbzquery closed rawhide xyz` : closed rawhide bugs for package xyz
 
-`rhbzquery closed rawhide xyz`: closed rawhide bugs for package xyz
+`rhbzquery --mine` : your open bugs (reads userid from `.bugzillarc`)
 
-`rhbzquery rhel8.3 bash`: RHEL 8.3 bash bugs
+`rhbzquery rhel8.3 bash` : RHEL 8.3 bash bugs
 
-`rhbzquery "Package Review" reporter_realname="Your Name"`: open package reviews you reported
+`rhbzquery "Package Review" reporter_realname="Your Name"` : open package reviews you reported
 
-`rhbzquery --mine all flag=fedora-review+`: all your open and closed approved reviews
+`rhbzquery --mine all flag=fedora-review+` : all your open and closed approved reviews
 
-`rhbzquery summary=bugzilla`: open bugs with summary containing "bugzilla":
+`rhbzquery summary=bugzilla` : open bugs with summary containing "bugzilla":
+
+`rhbzquery --file f33 xyz` : file a bug against the xyz package in F33
 
 ### Help
-`rhbzquery --help` lists the many fields (note: not all well supported yet, eg timestamps).
+`rhbzquery --help` : lists the many fields (note: not all well supported yet, eg timestamps).
 
 ## Installation
 Run `stack install` or `cabal install`.
