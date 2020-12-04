@@ -30,6 +30,8 @@ and if xdg-open is available will try to open the url
 ## Installation
 Run `stack install` or `cabal install`.
 
+Binary packages for Fedora are available from <https://copr.fedorainfracloud.org/coprs/petersen/rhbzquery/>.
+
 ## Requests and feedback
 Feature requests, bug reports and contributions are welcome.
 
