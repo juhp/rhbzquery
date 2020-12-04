@@ -22,8 +22,11 @@ and if xdg-open is available will try to open the url
 
 `rhbzquery summary=bugzilla`: open bugs with summary containing "bugzilla":
 
-## Help
+### Help
 `rhbzquery --help` lists the many fields (note: not all well supported yet, eg timestamps).
+
+## Installation
+Run `stack install` or `cabal install`.
 
 ## Requests and feedback
 Feature requests, bug reports and contributions are welcome.
