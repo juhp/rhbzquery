@@ -1,5 +1,8 @@
 # rhbzquery releases
 
+## 0.2 (2020-12-09)
+- support most search type operators (regexp, substr, isempty, and negatives)
+
 ## 0.1.1 (2020-12-04)
 - --file a bug
 - --help: do not format FIELDS

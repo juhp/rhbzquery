@@ -18,9 +18,9 @@ and if xdg-open is available will try to open the url
 
 `rhbzquery "Package Review" reporter_realname="Your Name"` : open package reviews you reported
 
-`rhbzquery --mine all flag=fedora-review+` : all your open and closed approved reviews
+`rhbzquery --mine all flag~fedora-review+` : all your open and closed approved reviews
 
-`rhbzquery summary=bugzilla` : open bugs with summary containing "bugzilla":
+`rhbzquery component~bugzilla summary~bugzilla` : open bugs with component and summary containing "bugzilla"
 
 `rhbzquery --file f33 xyz` : file a bug against the xyz package in F33
 
