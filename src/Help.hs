@@ -21,6 +21,8 @@ detailedHelp =
   , P.empty
   , P.text "PRODUCTVERSION = " <> P.lbrace <> P.align (P.fillCat (P.punctuate P.comma (map P.text ["rawhide", "fedora", "fXY", "epel", "epelX", "rhel8", "rhel7", "rhelX.Z"])) <> P.rbrace)
   , P.empty
+  , P.text "'op' is " <> P.align (P.fillCat (P.punctuate P.comma (map P.text ["'='(equals)", "'!='(notequals)", "'~'(substring)", "'!~'(notsubstring)", "'=~'(regexp)", "'!=~'(notregexp)", "'~a~'(allwordssubstr)", "'!a~'(nowordssubstr)", "'~c~'(casesubstring)", "'~e~'(isempty)", "'!e~'(isnotempty)", "'~w~'(allwords)", "'!w~'(nowords)"])))
+  , P.empty
   , P.text "See https://github.com/juhp/rhbzquery#readme for examples"
   ]
 

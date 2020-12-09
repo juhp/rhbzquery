@@ -8,7 +8,7 @@ where
 import Data.Version
 import Numeric.Natural
 
-import ParseArg (ArgType(..), ProductVersion(..))
+import ParseArg (ArgType(..), Operator(..), ProductVersion(..), showOp)
 
 data BzFields = BzProduct
               | BzVersion
@@ -21,28 +21,27 @@ instance Show BzFields where
   show BzProduct = "product"
   show BzVersion = "version"
   show BzComponent = "component"
-  show (BzParameter f) = mapFields f
+  show (BzParameter f) = f
   show (BzMeta c n) = c: show n
 
-mapFields :: String -> String
-mapFields "itm" = "cf_internal_target_milestone"
-mapFields "itr" = "cf_internal_target_release"
-mapFields "status" = "bug_status"
-mapFields "verified" = "cf_verified"
-mapFields s = s
-
-mapComplex :: String -> String
-mapComplex "sst" = "agile_team.name"
-mapComplex "summary" = "short_desc"
-mapComplex "flag" = "flagtypes.name"
-mapComplex "flags" = "flagtypes.name"
-mapComplex p = p
+mapField :: String -> String
+mapField "itm" = "cf_internal_target_milestone"
+mapField "itr" = "cf_internal_target_release"
+mapField "status" = "bug_status"
+mapField "verified" = "cf_verified"
+mapField "sst" = "agile_team.name"
+mapField "summary" = "short_desc"
+mapField "flag" = "flagtypes.name"
+mapField "flags" = "flagtypes.name"
+mapField p = p
 
 argToSimpleField :: ArgType -> [(BzFields,String)]
 argToSimpleField (ArgProdVer prodver) =
   productVersionQuery prodver
-argToSimpleField (ArgParameter p v) =
-  [(BzParameter (mapComplex p), v)]
+argToSimpleField (ArgParameter p Equals v) =
+  [(BzParameter (mapField p), v)]
+argToSimpleField (ArgParameter p _ v) =
+  error $ "Only '" ++ p ++ "=" ++ v ++ "'allowed here"
 argToSimpleField (ArgOther c) =
   [(BzComponent,c)]
 -- FIXME or error for "all"?
@@ -53,21 +52,20 @@ argToFields i arg =
   case arg of
     ArgProdVer prodver -> (i,productVersionQuery prodver)
     ArgStatusAll  -> (i,[])
-    ArgParameter "sst" v ->
-      (i+1,[(BzMeta 'f' i, mapComplex "sst")
-           ,(BzMeta 'o' i, "substr")
-           ,(BzMeta 'v' i, "sst_" ++ v)])
-    ArgParameter "summary" v ->
-      (i+1,[(BzMeta 'f' i, mapComplex "summary")
-           ,(BzMeta 'o' i, "substr")
-           ,(BzMeta 'v' i, v)])
-    ArgParameter param v ->
-      let p = mapComplex param
-      in if '.' `elem` p
-         then (i+1,[(BzMeta 'f' i, p)
-                   ,(BzMeta 'o' i, "substr")
-                   ,(BzMeta 'v' i, v)])
-         else (i,[(BzParameter p, v)])
+    ArgParameter p op v ->
+      let param = mapField p
+          val = if p == "sst"
+                then "sst_" ++ v
+                else v
+      in if '.' `elem` param || op /= Equals
+         then (i+1,[(BzMeta 'f' i, param)
+                   ,(BzMeta 'o' i, showOp op)
+                   ,(BzMeta 'v' i, val)])
+         else (i,[(BzParameter param, val)])
+    ArgParameterEmpty p e ->
+      let param = mapField p
+      in (i+1,[(BzMeta 'f' i, param)
+              ,(BzMeta 'o' i, if e then "isempty" else "isnotempty")])
     ArgOther c -> (i,[(BzComponent,c)])
 
 productVersionQuery :: ProductVersion -> [(BzFields,String)]
