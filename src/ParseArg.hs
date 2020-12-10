@@ -142,7 +142,6 @@ parseField ps =
 -- abcdefghijklmnopqrstuvwxyz
 -- ABCDEFGHIJKLMNOPQRSTUVWXYZ
 -- 0123456789-._+
--- Bugzilla components can contain a space though
 parseComponent :: String -> Maybe ArgType
 parseComponent ps =
   if all isPackageChar ps
@@ -151,4 +150,5 @@ parseComponent ps =
   where
     isPackageChar :: Char -> Bool
     isPackageChar c =
+      -- Bugzilla components can contain a space though
       isAsciiUpper c || isAsciiLower c || isDigit c || c `elem` " -._+"
