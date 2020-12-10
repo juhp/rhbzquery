@@ -8,7 +8,7 @@ import Data.Monoid ((<>))
 #endif
 import qualified Options.Applicative.Help.Pretty as P
 
-import ParseArg (operators, showOpHelp, statusList)
+import ParseArg (statusList)
 
 detailedHelp :: P.Doc
 detailedHelp =
@@ -19,8 +19,6 @@ detailedHelp =
   , P.text "STATUS = " <> P.lbrace <> P.align (P.fillCat (P.punctuate P.comma (map P.text (statusList ++ ["ALL"]))) <> P.rbrace)
   , P.empty
   , P.text "PRODUCTVERSION = " <> P.lbrace <> P.align (P.fillCat (P.punctuate P.comma (map P.text ["rawhide", "fedora", "fXY", "epel", "epelX", "rhel8", "rhel7", "rhelX.Z"])) <> P.rbrace)
-  , P.empty
-  , P.text "'op' is " <> P.align (P.fillCat (P.punctuate P.comma (map (P.text . showOpHelp) operators)) P.<//> P.text "[content~ & content!~ map to matches/notmatches]")
   , P.empty
   , P.text "See https://github.com/juhp/rhbzquery#readme for examples"
   ]

@@ -30,7 +30,7 @@ import ParseArg
 import Paths_rhbzquery
 import User
 
-data QueryMode = BugList | ListFields | CreateBug | APIQuery
+data QueryMode = BugList | ListFields | ListOperators | CreateBug | APIQuery
 
 main :: IO ()
 main =
@@ -39,12 +39,16 @@ main =
   switchWith 'n' "dryrun" "Do not open url" <*>
   switchWith 'm' "mine" "My bugs" <*>
   (flagWith' ListFields 'l' "list-fields" "List the query FIELDs" <|>
+   flagWith' ListOperators 'o' "list-operators" "List the operator types" <|>
    flagWith' CreateBug 'f' "file" "File a bug" <|>
    flagWith BugList APIQuery 'w' "api" "Web API query") <*>
   many (strArg argHelp)
   where
     run :: Bool -> Bool -> QueryMode -> [String] -> IO ()
     run _ _ ListFields _ = mapM_ putStrLn allBzFields
+    run _ _ ListOperators _ = do
+      mapM_ putStrLn $ map showOpHelp operators ++
+        ["", "content~ uses matches", "content!~ uses notmatches"]
     run dryrun mine mode args = do
       when (null args) $ error' "Please specify at least one argument"
       user <- if mine
@@ -74,6 +78,7 @@ main =
         BugList -> "buglist.cgi"
         CreateBug -> "enter_bug.cgi"
         ListFields -> "query.cgi" -- unused
+        ListOperators -> "query.cgi" -- unused
       <> renderQuery True (bzQuery query)
 
     hasStatusSet :: [ArgType] -> Bool

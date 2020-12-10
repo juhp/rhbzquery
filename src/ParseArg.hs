@@ -47,7 +47,7 @@ opSyntax (OpNull s) = s
 
 showOpHelp :: Operator -> String
 showOpHelp op =
-  "'" ++ opSyntax (opData op) ++ "'(" ++ showOp op ++ ")"
+  "'" ++ opSyntax (opData op) ++ "': " ++ showOp op
 
 instance Ord OperatorData where
   compare op1 op2 =
