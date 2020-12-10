@@ -3,7 +3,9 @@ module ParseArg (
   readBzQueryArg,
   ArgType(..),
   Operator(..),
+  operators,
   showOp,
+  showOpHelp,
   ProductVersion(..),
   statusList
   )
@@ -21,28 +23,61 @@ argHelp :: String
 argHelp = "[COMPONENT|STATUS|PRODUCTVERSION|FIELD=VALUE|FIELDopVALUE]..."
 
 data Operator = Equals | NotEqual
-              | Contains | NotContain
-              | ContainsCase
               | Regexp |NotRegexp
-              | ContainsAll | NotContainAll
-              | ContainsWords | NotContainWords
+              | Substring | NotSubstring
+              | CaseSubstring
+              | AllWordsSubstr | NoWordsSubstr
+              | AllWords | NoWords
+              | IsEmpty | IsNotEmpty
               -- | ContentMatches | ContentNotMatch
-  deriving Eq
+  deriving (Eq,Show,Enum,Bounded)
 
 showOp :: Operator -> String
-showOp Equals = "equals"
-showOp NotEqual = "notequals"
-showOp Contains = "substring"
-showOp NotContain = "notsubstring"
-showOp ContainsCase = "casesubstring"
-showOp Regexp = "regexp"
-showOp NotRegexp = "notregexp"
-showOp ContainsAll = "allwordssubstr"
-showOp NotContainAll = "nowordssubstr"
-showOp ContainsWords = "allwords"
-showOp NotContainWords = "nowords"
---showOp IsEmpty = "isempty"
---showOp IsNotEmpty = "isnotempty"
+showOp = lower . show
+
+operators :: [Operator]
+operators = enumFromTo minBound maxBound
+
+data OperatorData = OpUnary String | OpNull String
+  deriving Eq
+
+opSyntax :: OperatorData -> String
+opSyntax (OpUnary s) = s
+opSyntax (OpNull s) = s
+
+showOpHelp :: Operator -> String
+showOpHelp op =
+  "'" ++ opSyntax (opData op) ++ "'(" ++ showOp op ++ ")"
+
+instance Ord OperatorData where
+  compare op1 op2 =
+    let sop1 = opSyntax op1
+        sop2 = opSyntax op2
+    in
+      if sop1 `isInfixOf` sop2 then GT
+      else if sop2 `isInfixOf` sop1 then LT
+           else if sop1 == sop2
+                then error' $ sop1 ++ " listed twice in 'operators'"
+                else compare (reverse sop1) (reverse sop2)
+
+-- FIXME check all unique
+opData :: Operator -> OperatorData
+opData Equals = OpUnary "="
+opData NotEqual = OpUnary "!="
+opData Substring = OpUnary "~"
+opData NotSubstring = OpUnary "!~"
+opData CaseSubstring = OpUnary "~c~"
+opData Regexp = OpUnary "=~"
+opData NotRegexp = OpUnary "!=~"
+opData AllWordsSubstr = OpUnary "~a~"
+opData NoWordsSubstr = OpUnary "!a~"
+opData AllWords = OpUnary "~w~"
+opData NoWords = OpUnary "!w~"
+opData IsEmpty = OpNull "~e~"
+opData IsNotEmpty = OpNull "!e~"
+-- -- only for 'content':
+-- opData Matches = OpUnary "~m~"
+-- opData NotMatches = OpUnary "!m~"
 
 data ArgType = ArgProdVer ProductVersion
              | ArgStatusAll
@@ -54,7 +89,7 @@ readBzQueryArg :: String -> Maybe ArgType
 readBzQueryArg s =
   ArgProdVer <$> readProductVersion s <|>
   parseStatus s <|>
-  parseParam s <|>
+  parseField s <|>
   parseComponent s
 
 data ProductVersion = Fedora (Maybe Natural)
@@ -82,39 +117,26 @@ parseStatus s =
     else
       ArgParameter "bug_status" Equals <$> find (== upper s) statusList
 
-parseParam :: String -> Maybe ArgType
-parseParam ps =
-  parseParamWith "!=~" NotRegexp <|>
-  parseParamWith "=~" Regexp <|>
-  parseParamWith "!=" NotEqual <|>
-  parseParamWith "=" Equals <|>
-  parseParamWith "!~" NotContain <|>
-  parseParamWith "~a~" ContainsAll <|>
-  parseParamWith "!a~" NotContainAll <|>
-  parseParamWith "~c~" ContainsCase <|>
-  parseParamEmpty "~e~" True <|>
-  parseParamEmpty "!e~" False <|>
-  parseParamWith "~w~" ContainsWords <|>
-  parseParamWith "!w~" NotContainWords <|>
---  parseParamWith "~m~" ContentMatches <|>
---  parseParamWith "!m~" ContentNotMatch <|>
-  parseParamWith "~" Contains
+parseField :: String -> Maybe ArgType
+parseField ps =
+  foldr ((<|>) . parseParam) Nothing $ sortOn opData operators
   where
-    parseParamWith :: String -> Operator -> Maybe ArgType
-    parseParamWith op oper =
-      if op `isInfixOf` ps then
-        case splitOn op ps of
-          (f:val) -> Just (ArgParameter f oper (intercalate op val))
-          _ -> Nothing
-      else Nothing
-
-    parseParamEmpty :: String -> Bool -> Maybe ArgType
-    parseParamEmpty op empty =
-      case stripSuffix op ps of
-        Just a -> if null a
-                  then error' $ "bad parameter: " ++ ps
-                  else Just (ArgParameterEmpty a empty)
-        _ -> Nothing
+    parseParam :: Operator -> Maybe ArgType
+    parseParam oper =
+      case opData oper of
+        OpUnary op ->
+          if op `isInfixOf` ps then
+            case splitOn op ps of
+              (f:val) -> Just (ArgParameter f oper (intercalate op val))
+              _ -> Nothing
+          else Nothing
+        OpNull op ->
+          case stripSuffix op ps of
+            Just a ->
+              if null a
+              then error' $ "bad parameter: " ++ ps
+              else Just (ArgParameterEmpty a (oper == IsEmpty))
+            _ -> Nothing
 
 -- https://fedoraproject.org/wiki/Packaging:Naming?rd=Packaging:NamingGuidelines#Common_Character_Set_for_Package_Naming
 -- abcdefghijklmnopqrstuvwxyz
