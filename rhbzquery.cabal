@@ -1,5 +1,5 @@
 name:                rhbzquery
-version:             0.2
+version:             0.3
 synopsis:            Bugzilla query tool
 description:
         A CLI tool for creating bugzilla queries for bugzilla.redhat.com.
