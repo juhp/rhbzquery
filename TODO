@@ -1,7 +1,7 @@
-- unify operator data and help
-
-? copy url to clipboard
+- --list-operators?
+- --url for server
 - tui bug browser
+- --json output
 - cc=me, reporter=me
 - config file: for defining "my team" etc
 - --count bugs (no such api though)
