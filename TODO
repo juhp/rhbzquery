@@ -1,9 +1,7 @@
-- copy url to clipboard
+- unify operator data and help
+
+? copy url to clipboard
 - tui bug browser
-- help: --fields-matching
-- use NOT Closed ?
 - cc=me, reporter=me
 - config file: for defining "my team" etc
-- --help: only show most important fields
-  --help-all for all
-- --count bugs
+- --count bugs (no such api though)

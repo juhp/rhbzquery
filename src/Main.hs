@@ -15,21 +15,22 @@ import qualified Data.List as L
 import Network.HTTP.Types
 import Options.Applicative (fullDesc, header, progDescDoc,
 #if !MIN_VERSION_simple_cmd_args(0,1,4)
-                            some
+                            many
 #endif
   )
-import SimpleCmd
+import SimpleCmd (cmd_)
 import SimpleCmdArgs
 import System.Directory
 
 import Bugzilla
+import Common
 import Fields
 import Help
 import ParseArg
 import Paths_rhbzquery
 import User
 
-data OtherQuery = CreateBug | APIQuery
+data QueryMode = BugList | ListFields | CreateBug | APIQuery
 
 main :: IO ()
 main =
@@ -37,30 +38,43 @@ main =
   run <$>
   switchWith 'n' "dryrun" "Do not open url" <*>
   switchWith 'm' "mine" "My bugs" <*>
-  optional (flagWith' CreateBug 'f' "file" "File a bug" <|>
-            flagWith' APIQuery 'w' "api" "Web API query") <*>
-  some (strArg argHelp)
+  (flagWith' ListFields 'l' "list-fields" "List the query FIELDs" <|>
+   flagWith' CreateBug 'f' "file" "File a bug" <|>
+   flagWith BugList APIQuery 'w' "api" "Web API query") <*>
+  many (strArg argHelp)
   where
-    run :: Bool -> Bool -> Maybe OtherQuery -> [String] -> IO ()
-    run dryrun mine mquery args = do
+    run :: Bool -> Bool -> QueryMode -> [String] -> IO ()
+    run _ _ ListFields _ = mapM_ putStrLn allBzFields
+    run dryrun mine mode args = do
+      when (null args) $ error' "Please specify at least one argument"
       user <- if mine
         then do
         mail <- getBzUser
         return [ArgParameter "assigned_to" Equals mail]
         else return []
       let argtypes = mapMaybe readBzQueryArg args
-          url = case mquery of
-            Just CreateBug ->
-              let query = L.nub $ concatMap argToSimpleField argtypes
-              in "https://" <> B.pack brc <> "/enter_bug.cgi" <> renderQuery True (bzQuery query)
-            _ ->
-              let status = [ArgParameter "bug_status" Equals "__open__" | not (hasStatusSet argtypes)]
-                  query = L.nub $ numberMetaFields $ status ++ user ++ argtypes
-              in "https://" <> B.pack brc <> "/" <> (if isNothing mquery then "buglist.cgi" else "rest/bug")<> renderQuery True (bzQuery query)
+          url =
+            let query =
+                  case mode of
+                    CreateBug -> L.nub $ concatMap argToSimpleField argtypes
+                    _ ->
+                      let status = [ArgParameter "bug_status" Equals "__open__" | not (hasStatusSet argtypes)]
+                      in L.nub $ numberMetaFields $ status ++ user ++ argtypes
+            in queryURL mode query
       B.putStrLn url
       unless dryrun $ do
         whenJustM (findExecutable "xdg-open") $ \xdgOpen ->
           cmd_ xdgOpen [B.unpack url]
+
+    queryURL :: QueryMode -> [(BzFields,String)] -> B.ByteString
+    queryURL mode query =
+      "https://" <> B.pack brc <> "/" <>
+      case mode of
+        APIQuery -> "rest/bug"
+        BugList -> "buglist.cgi"
+        CreateBug -> "enter_bug.cgi"
+        ListFields -> "query.cgi" -- unused
+      <> renderQuery True (bzQuery query)
 
     hasStatusSet :: [ArgType] -> Bool
     hasStatusSet [] = False

@@ -1,4 +1,5 @@
 module Fields (
+  allBzFields,
   BzFields(..),
   argToFields,
   argToSimpleField
@@ -8,6 +9,7 @@ where
 import Data.Version
 import Numeric.Natural
 
+import Common
 import ParseArg (ArgType(..), Operator(..), ProductVersion(..), showOp)
 
 data BzFields = BzProduct
@@ -24,25 +26,14 @@ instance Show BzFields where
   show (BzParameter f) = f
   show (BzMeta c n) = c: show n
 
-mapField :: String -> String
-mapField "itm" = "cf_internal_target_milestone"
-mapField "itr" = "cf_internal_target_release"
-mapField "status" = "bug_status"
-mapField "verified" = "cf_verified"
-mapField "sst" = "agile_team.name"
-mapField "summary" = "short_desc"
-mapField "flag" = "flagtypes.name"
-mapField "flags" = "flagtypes.name"
-mapField p = p
-
 argToSimpleField :: ArgType -> [(BzFields,String)]
 argToSimpleField (ArgProdVer prodver) =
   productVersionQuery prodver
 argToSimpleField (ArgParameter p Equals v) =
   [(BzParameter (mapField p), v)]
 argToSimpleField (ArgParameter p _ v) =
-  error $ "Only '" ++ p ++ "=" ++ v ++ "'allowed here"
-argToSimpleField (ArgOther c) =
+  error' $ "Only '" ++ p ++ "=" ++ v ++ "'allowed here"
+argToSimpleField (ArgComponent c) =
   [(BzComponent,c)]
 -- FIXME or error for "all"?
 argToSimpleField _ = []
@@ -66,7 +57,7 @@ argToFields i arg =
       let param = mapField p
       in (i+1,[(BzMeta 'f' i, param)
               ,(BzMeta 'o' i, if e then "isempty" else "isnotempty")])
-    ArgOther c -> (i,[(BzComponent,c)])
+    ArgComponent c -> (i,[(BzComponent,c)])
 
 productVersionQuery :: ProductVersion -> [(BzFields,String)]
 productVersionQuery (Fedora Nothing) = [(BzProduct, "Fedora")]
@@ -79,7 +70,154 @@ productVersionQuery (EPEL (Just n)) = [(BzProduct, "Fedora EPEL")
                                       ,(BzVersion, show n)]
 productVersionQuery (RHEL ver) =
   case versionBranch ver of
-    [] -> error "Can't search RHEL without version"
+    [] -> error' "Can't search RHEL without version"
     [major] -> [(BzProduct, "Red Hat Enterprise Linux " ++ show major)]
     (major:_) ->  [(BzProduct, "Red Hat Enterprise Linux " ++ show major)
                   ,(BzVersion, showVersion ver)]
+
+-- FIXME move map to allBzFields
+mapField :: String -> String
+mapField f =
+  let longname =
+        case f of
+          "itm" -> "cf_internal_target_milestone"
+          "itr" -> "cf_internal_target_release"
+          "status" -> "bug_status"
+          "verified" -> "cf_verified"
+          "sst" -> "agile_team.name"
+          "summary" -> "short_desc"
+          "flag" -> "flagtypes.name"
+          "flags" -> "flagtypes.name"
+          p -> p
+  in if longname `elem` allBzFields
+     then longname
+     else error' $ "unknown field: " ++ f
+
+-- https://bugzilla.redhat.com/query.cgi?query_format=advanced
+-- https://bugzilla.redhat.com/rest/field/bug
+-- or: bugzilla query --json -b bug#
+allBzFields :: [String]
+allBzFields =
+  ["agile_pool.name",
+   "agile_team.name",
+   "alias",
+   "assigned_to",
+   "assigned_to_realname",
+   "attach_data.thedata",
+   "attachments.description",
+   "attachments.filename",
+   "attachments.isobsolete",
+   "attachments.ispatch",
+   "attachments.isprivate",
+   "attachments.mimetype",
+   "attachments.submitter",
+   "blocked",
+   "bug_agile_pool.pool_id",
+   "bug_agile_pool.pool_order",
+   "bug_file_loc",
+   "bug_group",
+   "bug_id",
+   "bug_severity",
+   "bug_status",
+   "cc",
+   "cclist_accessible",
+   "cf_approved_release",
+   "cf_atomic",
+   "cf_build_id",
+   "cf_business_market_problem",
+   "cf_category",
+   "cf_clone_of",
+   "cf_cloudforms_team",
+   "cf_compliance_control_group",
+   "cf_compliance_level",
+   "cf_conditional_nak",
+   "cf_crm",
+   "cf_cust_facing",
+   "cf_deadline",
+   "cf_deadline_type",
+   "cf_devdoctest",
+   "cf_devel_whiteboard",
+   "cf_doc_type",
+   "cf_docs_score",
+   "cf_documentation_action",
+   "cf_environment",
+   "cf_epm_cdp",
+   "cf_epm_phd",
+   "cf_epm_prf_state",
+   "cf_epm_pri",
+   "cf_epm_ptl",
+   "cf_epm_put",
+   "cf_final_deadline",
+   "cf_fixed_in",
+   "cf_internal_target_milestone",
+   "cf_internal_target_release",
+   "cf_internal_whiteboard",
+   "cf_last_closed",
+   "cf_mount_type",
+   "cf_ovirt_team",
+   "cf_pgm_internal",
+   "cf_pm_score",
+   "cf_qa_whiteboard",
+   "cf_qe_conditional_nak",
+   "cf_regression_status",
+   "cf_release_notes",
+   "cf_srtnotes",
+   "cf_story_points",
+   "cf_target_upstream_version",
+   "cf_type",
+   "cf_verified_branch",
+   "cf_zstream_target_release",
+   "classification",
+   "comment_tag",
+   "commenter",
+   "component",
+   "content",
+   "creation_ts",
+   "days_elapsed",
+   "deadline",
+   "delta_ts",
+   "dependent_products",
+   "dependson",
+   "docs_contact",
+   "docs_contact_realname",
+   "estimated_time",
+   "everconfirmed",
+   "ext_bz_bug_map.ext_bz_bug_id",
+   "ext_bz_bug_map.ext_status",
+   "external_bugzilla.description",
+   "external_bugzilla.url",
+   "extra_components",
+   "extra_versions",
+   "flagtypes.name",
+   "keywords",
+   "last_visit_ts",
+   "longdesc",
+   "longdescs.count",
+   "longdescs.isprivate",
+   "op_sys",
+   "owner_idle_time",
+   "percentage_complete",
+   "priority",
+   "product",
+   "qa_contact",
+   "qa_contact_realname",
+   "remaining_time",
+   "rep_platform",
+   "reporter",
+   "reporter_accessible",
+   "reporter_realname",
+   "requestees.login_name",
+   "resolution",
+   "rh_rule",
+   "rh_sub_components",
+   "see_also",
+   "setters.login_name",
+   "short_desc",
+   "status_whiteboard",
+   "tag",
+   "target_milestone",
+   "target_release",
+   "version",
+   "view",
+   "votes",
+   "work_time"]

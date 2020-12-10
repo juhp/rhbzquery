@@ -15,6 +15,8 @@ import Data.List.Extra as L
 import Data.Version.Extra
 import Numeric.Natural
 
+import Common
+
 argHelp :: String
 argHelp = "[COMPONENT|STATUS|PRODUCTVERSION|FIELD=VALUE|FIELDopVALUE]..."
 
@@ -46,14 +48,14 @@ data ArgType = ArgProdVer ProductVersion
              | ArgStatusAll
              | ArgParameter String Operator String
              | ArgParameterEmpty String Bool
-             | ArgOther String
+             | ArgComponent String
 
 readBzQueryArg :: String -> Maybe ArgType
 readBzQueryArg s =
   ArgProdVer <$> readProductVersion s <|>
   parseStatus s <|>
   parseParam s <|>
-  pure (ArgOther s)
+  parseComponent s
 
 data ProductVersion = Fedora (Maybe Natural)
                     | Rawhide
@@ -100,16 +102,31 @@ parseParam ps =
   where
     parseParamWith :: String -> Operator -> Maybe ArgType
     parseParamWith op oper =
-      case splitOn op ps of
-        [a,b] -> if null a || null b
-                 then error $ "bad parameter: " ++ ps
-                 else Just (ArgParameter a oper b)
-        _ -> Nothing
+      if op `isInfixOf` ps then
+        case splitOn op ps of
+          (f:val) -> Just (ArgParameter f oper (intercalate op val))
+          _ -> Nothing
+      else Nothing
 
     parseParamEmpty :: String -> Bool -> Maybe ArgType
     parseParamEmpty op empty =
       case stripSuffix op ps of
         Just a -> if null a
-                  then error $ "bad parameter: " ++ ps
+                  then error' $ "bad parameter: " ++ ps
                   else Just (ArgParameterEmpty a empty)
         _ -> Nothing
+
+-- https://fedoraproject.org/wiki/Packaging:Naming?rd=Packaging:NamingGuidelines#Common_Character_Set_for_Package_Naming
+-- abcdefghijklmnopqrstuvwxyz
+-- ABCDEFGHIJKLMNOPQRSTUVWXYZ
+-- 0123456789-._+
+-- Bugzilla components can contain a space though
+parseComponent :: String -> Maybe ArgType
+parseComponent ps =
+  if all isPackageChar ps
+  then Just (ArgComponent ps)
+  else error' $ "Invalid component name: " ++ ps
+  where
+    isPackageChar :: Char -> Bool
+    isPackageChar c =
+      isAsciiUpper c || isAsciiLower c || isDigit c || c `elem` " -._+"

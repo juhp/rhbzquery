@@ -25,6 +25,7 @@ source-repository head
 executable rhbzquery
   main-is:             Main.hs
   other-modules:       Bugzilla
+                       Common
                        Fields
                        Help
                        ParseArg
