@@ -48,9 +48,16 @@ argToFields i arg =
           val = if p == "sst"
                 then "sst_" ++ v
                 else v
+          oper = if p == "content"
+                 then case op of
+                        Equals -> "equals"
+                        Substring -> "matches"
+                        NotSubstring -> "notmatches"
+                        _ -> error' "'content' only supports matches and notmatches"
+                 else showOp op
       in if '.' `elem` param || op /= Equals
          then (i+1,[(BzMeta 'f' i, param)
-                   ,(BzMeta 'o' i, showOp op)
+                   ,(BzMeta 'o' i, oper)
                    ,(BzMeta 'v' i, val)])
          else (i,[(BzParameter param, val)])
     ArgParameterEmpty p e ->

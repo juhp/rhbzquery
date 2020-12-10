@@ -20,7 +20,7 @@ detailedHelp =
   , P.empty
   , P.text "PRODUCTVERSION = " <> P.lbrace <> P.align (P.fillCat (P.punctuate P.comma (map P.text ["rawhide", "fedora", "fXY", "epel", "epelX", "rhel8", "rhel7", "rhelX.Z"])) <> P.rbrace)
   , P.empty
-  , P.text "'op' is " <> P.align (P.fillCat (P.punctuate P.comma (map P.text (map showOpHelp operators))))
+  , P.text "'op' is " <> P.align (P.fillCat (P.punctuate P.comma (map (P.text . showOpHelp) operators)) P.<//> P.text "[content~ & content!~ map to matches/notmatches]")
   , P.empty
   , P.text "See https://github.com/juhp/rhbzquery#readme for examples"
   ]
