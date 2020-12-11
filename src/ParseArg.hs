@@ -22,12 +22,14 @@ import Common
 argHelp :: String
 argHelp = "[COMPONENT|STATUS|PRODUCTVERSION|FIELD=VALUE|FIELDopVALUE]..."
 
-data Operator = Equals | NotEqual
+data Operator = NoOp
+              | Equals | NotEqual
               | Regexp |NotRegexp
+              | AnyExact
               | Substring | NotSubstring
               | CaseSubstring
-              | AllWordsSubstr | NoWordsSubstr
-              | AllWords | NoWords
+              | AnyWordsSubstr | AllWordsSubstr | NoWordsSubstr
+              | AnyWords | AllWords | NoWords
               | IsEmpty | IsNotEmpty
               -- | ContentMatches | ContentNotMatch
   deriving (Eq,Show,Enum,Bounded)
@@ -38,16 +40,21 @@ showOp = lower . show
 operators :: [Operator]
 operators = enumFromTo minBound maxBound
 
-data OperatorData = OpUnary String | OpNull String
+data OperatorData = OpUnary String String | OpNull String String
   deriving Eq
 
 opSyntax :: OperatorData -> String
-opSyntax (OpUnary s) = s
-opSyntax (OpNull s) = s
+opSyntax (OpUnary s _) = s
+opSyntax (OpNull s _) = s
+
+opDescribe :: OperatorData -> String
+opDescribe (OpUnary _ h) = h
+opDescribe (OpNull _ h) = h
 
 showOpHelp :: Operator -> String
 showOpHelp op =
-  "'" ++ opSyntax (opData op) ++ "': " ++ showOp op
+  let opd = opData op
+  in "'" ++ opSyntax opd ++ "': " ++ showOp op ++ " (" ++ opDescribe opd ++ ")"
 
 instance Ord OperatorData where
   compare op1 op2 =
@@ -62,19 +69,23 @@ instance Ord OperatorData where
 
 -- FIXME check all unique
 opData :: Operator -> OperatorData
-opData Equals = OpUnary "="
-opData NotEqual = OpUnary "!="
-opData Substring = OpUnary "~"
-opData NotSubstring = OpUnary "!~"
-opData CaseSubstring = OpUnary "~c~"
-opData Regexp = OpUnary "=~"
-opData NotRegexp = OpUnary "!=~"
-opData AllWordsSubstr = OpUnary "~a~"
-opData NoWordsSubstr = OpUnary "!a~"
-opData AllWords = OpUnary "~w~"
-opData NoWords = OpUnary "!w~"
-opData IsEmpty = OpNull "~e~"
-opData IsNotEmpty = OpNull "!e~"
+opData NoOp = OpNull "~noop~" "ignore (comment out query field)"
+opData Equals = OpUnary "=" "is equal to"
+opData NotEqual = OpUnary "!=" "is not equal to"
+opData AnyExact = OpUnary "~anyexact=" "is equal to any of the strings"
+opData Substring = OpUnary "~" "contains the string"
+opData NotSubstring = OpUnary "!~" "does not contain the string"
+opData CaseSubstring = OpUnary "~case~" "contains the string (exact case)"
+opData AnyWordsSubstr = OpUnary "~any~" "contains any of the strings"
+opData AllWordsSubstr = OpUnary "~all~" "contains all of the strings"
+opData NoWordsSubstr = OpUnary "~no~" "contains none of the strings"
+opData Regexp = OpUnary "=~" "matches regular expression"
+opData NotRegexp = OpUnary "!=~" "does not match regular expression"
+opData AnyWords = OpUnary "~anywords~" "contains any of the words"
+opData AllWords = OpUnary "~allwords~" "contains all of the words"
+opData NoWords = OpUnary "~nowords~" "contains none of the words"
+opData IsEmpty = OpNull "~empty~" "is empty"
+opData IsNotEmpty = OpNull "~notempty~" "is not empty"
 -- -- only for 'content':
 -- opData Matches = OpUnary "~m~"
 -- opData NotMatches = OpUnary "!m~"
@@ -124,13 +135,13 @@ parseField ps =
     parseParam :: Operator -> Maybe ArgType
     parseParam oper =
       case opData oper of
-        OpUnary op ->
+        OpUnary op _ ->
           if op `isInfixOf` ps then
             case splitOn op ps of
               (f:val) -> Just (ArgParameter f oper (intercalate op val))
               _ -> Nothing
           else Nothing
-        OpNull op ->
+        OpNull op _ ->
           case stripSuffix op ps of
             Just a ->
               if null a
