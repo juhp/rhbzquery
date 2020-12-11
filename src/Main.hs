@@ -1,6 +1,8 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+module Main (main) where
+
 #if !MIN_VERSION_simple_cmd_args(0,1,3)
 import Control.Applicative ((<|>))
 #endif
