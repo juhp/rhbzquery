@@ -49,8 +49,9 @@ main =
     run _ _ ListOperators _ = do
       mapM_ putStrLn $ map showOpHelp operators ++
         ["", "content~ uses matches", "content!~ uses notmatches"]
+    -- FIXME should really use some and many
+    run _ _ _ [] = error' "please give an argument or --help"
     run dryrun mine mode args = do
-      when (null args) $ error' "Please specify at least one argument"
       user <- if mine
         then do
         mail <- getBzUser
