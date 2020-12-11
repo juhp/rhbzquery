@@ -38,8 +38,8 @@ main =
   run <$>
   switchWith 'n' "dryrun" "Do not open url" <*>
   switchWith 'm' "mine" "My bugs" <*>
-  (flagWith' ListFields 'l' "list-fields" "List the query FIELDs" <|>
-   flagWith' ListOperators 'o' "list-operators" "List the operator types" <|>
+  (flagWith' ListFields 'l' "list-fields" "List query FIELDs" <|>
+   flagWith' ListOperators 'o' "list-operators" "List op search operator types" <|>
    flagWith' CreateBug 'f' "file" "File a bug" <|>
    flagWith BugList APIQuery 'w' "api" "Web API query") <*>
   many (strArg argHelp)
