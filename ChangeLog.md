@@ -1,5 +1,9 @@
 # rhbzquery releases
 
+## 0.4 (2020-12-11)
+- add --list-operators
+- rename longer operators to be more memorable
+
 ## 0.3 (2020-12-10)
 - add --list-fields option
 - field validation: error for unknown fields

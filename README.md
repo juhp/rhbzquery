@@ -27,7 +27,9 @@ and if xdg-open is available will try to open the url
 ### Help
 `rhbzquery --help` describes arguments
 
-`rhbzquery --list-fields` : lists the many fields (not all well supported yet, eg timestamps).
+`rhbzquery --list-fields` : lists the many fields (not all well supported yet, eg timestamps)
+
+`rhbzquery --list-operators` : lists the search operator types
 
 ## Installation
 Run `stack install` or `cabal install`.
