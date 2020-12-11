@@ -22,15 +22,15 @@ import Common
 argHelp :: String
 argHelp = "[COMPONENT|STATUS|PRODUCTVERSION|FIELD=VALUE|FIELDopVALUE]..."
 
-data Operator = NoOp
-              | Equals | NotEqual
-              | Regexp |NotRegexp
-              | AnyExact
+data Operator = Equals | NotEqual
               | Substring | NotSubstring
+              | Regexp |NotRegexp
               | CaseSubstring
               | AnyWordsSubstr | AllWordsSubstr | NoWordsSubstr
+              | AnyExact
               | AnyWords | AllWords | NoWords
               | IsEmpty | IsNotEmpty
+              | NoOp
               -- | ContentMatches | ContentNotMatch
   deriving (Eq,Show,Enum,Bounded)
 
@@ -54,7 +54,11 @@ opDescribe (OpNull _ h) = h
 showOpHelp :: Operator -> String
 showOpHelp op =
   let opd = opData op
-  in "'" ++ opSyntax opd ++ "': " ++ showOp op ++ " (" ++ opDescribe opd ++ ")"
+  in padSyntax opd ++ showOp op ++ " (" ++ opDescribe opd ++ ")"
+  where
+    padSyntax opd =
+      let ops = opSyntax opd
+      in replicate (10 - length ops) ' ' ++ "'" ++ ops ++ "' : "
 
 instance Ord OperatorData where
   compare op1 op2 =
