@@ -6,6 +6,7 @@ module Fields (
   )
 where
 
+import Data.List.Extra as L
 import Data.Version
 import Numeric.Natural
 
@@ -90,15 +91,16 @@ mapField f =
           "itm" -> "cf_internal_target_milestone"
           "itr" -> "cf_internal_target_release"
           "status" -> "bug_status"
-          "verified" -> "cf_verified"
           "sst" -> "agile_team.name"
           "summary" -> "short_desc"
           "flag" -> "flagtypes.name"
           "flags" -> "flagtypes.name"
-          p -> p
+          p -> L.replace "-" "_" p
   in if longname `elem` allBzFields
      then longname
-     else error' $ "unknown field: " ++ f
+     else if "cf_" ++ longname `elem` allBzFields
+          then "cf_" ++ longname
+          else error' $ "unknown field: " ++ f
 
 -- https://bugzilla.redhat.com/query.cgi?query_format=advanced
 -- https://bugzilla.redhat.com/rest/field/bug
