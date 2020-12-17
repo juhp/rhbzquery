@@ -23,6 +23,7 @@ import Options.Applicative (fullDesc, header, progDescDoc,
 import SimpleCmd (cmd_)
 import SimpleCmdArgs
 import System.Directory
+import System.IO
 
 import Bugzilla
 import Common
@@ -35,20 +36,22 @@ import User
 data QueryMode = BugList | ListFields | ListOperators | CreateBug | APIQuery
 
 main :: IO ()
-main =
+main = do
+  hSetBuffering stdout NoBuffering
   simpleCmdArgsWithMods (Just version) (fullDesc <> header "Bugzilla query tool" <> progDescDoc (Just detailedHelp)) $
-  run <$>
-  switchWith 'n' "dryrun" "Do not open url" <*>
-  switchWith 'm' "mine" "My bugs" <*>
-  (flagWith' ListFields 'l' "list-fields" "List query FIELDs" <|>
-   flagWith' ListOperators 'o' "list-operators" "List op search operator types" <|>
-   flagWith' CreateBug 'f' "file" "File a bug" <|>
-   flagWith BugList APIQuery 'w' "api" "Web API query") <*>
-  many (strArg argHelp)
+    run <$>
+    switchWith 'n' "dryrun" "Do not open url" <*>
+    switchWith 'm' "mine" "My bugs" <*>
+    (flagWith' ListFields 'l' "list-fields" "List query FIELDs" <|>
+     flagWith' ListOperators 'o' "list-operators" "List op search operator types" <|>
+     flagWith' CreateBug 'f' "file" "File a bug" <|>
+     flagWith BugList APIQuery 'w' "api" "Web API query") <*>
+    many (strArg argHelp)
   where
     run :: Bool -> Bool -> QueryMode -> [String] -> IO ()
+    -- FIXME list aliases
     run _ _ ListFields _ = mapM_ putStrLn allBzFields
-    run _ _ ListOperators _ = do
+    run _ _ ListOperators _ =
       mapM_ putStrLn $ map showOpHelp operators ++
         ["", "content~ uses matches", "content!~ uses notmatches"]
     -- FIXME should really use some and many
