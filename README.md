@@ -6,6 +6,8 @@ The tool outputs the bugzilla query url,
 and if xdg-open is available will try to open the url
 (unless --dryrun is given).
 
+rhbzquery is distributed under the GPL license version 2 or later.
+
 ## Usage examples
 
 `rhbzquery f33 xyz` : F33 bugs for package xyz

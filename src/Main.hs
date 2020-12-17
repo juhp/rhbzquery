@@ -1,6 +1,8 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+-- SPDX-License-Identifier: GPL-2.0-or-later
+
 module Main (main) where
 
 #if !MIN_VERSION_simple_cmd_args(0,1,3)
