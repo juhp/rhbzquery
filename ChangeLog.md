@@ -1,8 +1,8 @@
 # rhbzquery releases
 
 ## 0.4.1 (2020-12-17)
-- set no stdout buffering
-- change license from BSD3 to GPLv2+
+- set no stdout buffering (reported by @clrkwllms)
+- change license from BSD3 to GPLv2+ and add SPDX tags
 
 ## 0.4 (2020-12-11)
 - add --list-operators
