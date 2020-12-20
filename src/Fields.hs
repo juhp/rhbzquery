@@ -98,7 +98,7 @@ mapField f =
           "flag" -> "flagtypes.name"
           "flags" -> "flagtypes.name"
           p -> L.replace "-" "_" p
-  in if longname `elem` allBzFields
+  in if longname `elem` ("format":allBzFields)
      then longname
      else if "cf_" ++ longname `elem` allBzFields
           then "cf_" ++ longname

@@ -35,7 +35,9 @@ import ParseArg
 import Paths_rhbzquery
 import User
 
-data QueryMode = BugList | ListFields | ListOperators | CreateBug | APIQuery
+data QueryMode = BugList | ListFields | ListOperators | CreateBug
+               | QueryPage | APIQuery
+  deriving Eq
 
 main :: IO ()
 main = do
@@ -47,6 +49,7 @@ main = do
     (flagWith' ListFields 'l' "list-fields" "List query FIELDs" <|>
      flagWith' ListOperators 'o' "list-operators" "List op search operator types" <|>
      flagWith' CreateBug 'f' "file" "File a bug" <|>
+     flagWith' QueryPage 'q' "query" "Open advanced query page" <|>
      flagWith BugList APIQuery 'w' "api" "Web API query") <*>
     many (strArg argHelp)
   where
@@ -71,7 +74,8 @@ main = do
                     CreateBug -> L.nub $ concatMap argToSimpleField argtypes
                     _ ->
                       let status = [ArgParameter "bug_status" Equals "__open__" | not (hasStatusSet argtypes)]
-                      in L.nub $ numberMetaFields $ status ++ user ++ argtypes
+                          advanced = [ArgParameter "format" Equals "advanced" | mode == QueryPage]
+                      in L.nub $ numberMetaFields $ advanced ++ status ++ user ++ argtypes
             in queryURL mode query
       B.putStrLn url
       unless dryrun $ do
@@ -85,6 +89,7 @@ main = do
         APIQuery -> "rest/bug"
         BugList -> "buglist.cgi"
         CreateBug -> "enter_bug.cgi"
+        QueryPage -> "query.cgi"
         ListFields -> "query.cgi" -- unused
         ListOperators -> "query.cgi" -- unused
       <> renderQuery True (bzQuery query)
