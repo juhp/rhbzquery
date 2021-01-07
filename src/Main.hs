@@ -46,6 +46,7 @@ main = do
     run <$>
     switchWith 'n' "dryrun" "Do not open url" <*>
     switchWith 'm' "mine" "My bugs" <*>
+    strOptionalWith 's' "server" "SERVER" ("Bugzilla server [default: " ++ brc ++ "]") brc <*>
     (flagWith' ListFields 'l' "list-fields" "List query FIELDs" <|>
      flagWith' ListOperators 'o' "list-operators" "List op search operator types" <|>
      flagWith' CreateBug 'f' "file" "File a bug" <|>
@@ -53,19 +54,24 @@ main = do
      flagWith BugList APIQuery 'w' "api" "Web API query") <*>
     many (strArg argHelp)
   where
-    run :: Bool -> Bool -> QueryMode -> [String] -> IO ()
+    run :: Bool -> Bool -> String -> QueryMode -> [String] -> IO ()
     -- FIXME list aliases
-    run _ _ ListFields _ = mapM_ putStrLn allBzFields
-    run _ _ ListOperators _ =
+    run _ _ _ ListFields _ = mapM_ putStrLn allBzFields
+    run _ _ _ ListOperators _ =
       mapM_ putStrLn $ map showOpHelp operators ++
         ["", "content~ uses matches", "content!~ uses notmatches"]
     -- FIXME should really use some and many
-    run _ _ _ [] = error' "please give an argument or --help"
-    run dryrun mine mode args = do
-      user <- if mine
-        then do
-        mail <- getBzUser
-        return [ArgParameter "assigned_to" Equals mail]
+    run _ _ _ _ [] = error' "please give an argument or --help"
+    run dryrun mine server mode args = do
+      user <-
+        if mine
+        then
+          if server == brc
+          then do
+            mail <- getRhBzUser
+            return [ArgParameter "assigned_to" Equals mail]
+          else
+            error' "--mine and --server currently not supported together"
         else return []
       let argtypes = mapMaybe readBzQueryArg args
           url =
@@ -76,15 +82,15 @@ main = do
                       let status = [ArgParameter "bug_status" Equals "__open__" | not (hasStatusSet argtypes)]
                           advanced = [ArgParameter "format" Equals "advanced" | mode == QueryPage]
                       in L.nub $ numberMetaFields $ advanced ++ status ++ user ++ argtypes
-            in queryURL mode query
+            in queryURL server mode query
       B.putStrLn url
       unless dryrun $ do
         whenJustM (findExecutable "xdg-open") $ \xdgOpen ->
           cmd_ xdgOpen [B.unpack url]
 
-    queryURL :: QueryMode -> [(BzFields,String)] -> B.ByteString
-    queryURL mode query =
-      "https://" <> B.pack brc <> "/" <>
+    queryURL :: String -> QueryMode -> [(BzFields,String)] -> B.ByteString
+    queryURL server mode query =
+      "https://" <> B.pack server <> "/" <>
       case mode of
         APIQuery -> "rest/bug"
         BugList -> "buglist.cgi"

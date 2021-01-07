@@ -3,7 +3,7 @@
 -- SPDX-License-Identifier: GPL-2.0-or-later
 
 module User (
-  getBzUser
+  getRhBzUser
   )
 where
 
@@ -22,8 +22,8 @@ import qualified Text.Email.Validate as Email
 
 import Bugzilla
 
-eitherBzUser :: IO (Either FilePath String)
-eitherBzUser = do
+eitherRhBzUser :: IO (Either FilePath String)
+eitherRhBzUser = do
   home <- getEnv "HOME"
   let rc = home </> ".bugzillarc"
   -- FIXME assumption if file exists then it has b.r.c user
@@ -41,9 +41,9 @@ eitherBzUser = do
       ini <- T.readFile inifile
       return $ either error fn $ parseIniFile ini iniparser
 
-getBzUser :: IO String
-getBzUser = do
-  euser <- eitherBzUser
+getRhBzUser :: IO String
+getRhBzUser = do
+  euser <- eitherRhBzUser
   case euser of
     Right user -> return user
     Left rc -> do
@@ -51,7 +51,7 @@ getBzUser = do
       when (emailIsValid email) $ do
         writeFile rc $ "[" <> brc <> "]\nuser = " <> email <> "\n"
         putStrLn $ "Saved in " ++ rc
-      getBzUser
+      getRhBzUser
   where
     emailIsValid :: String -> Bool
     emailIsValid = Email.isValid . B.pack
