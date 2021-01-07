@@ -65,13 +65,9 @@ main = do
     run dryrun mine server mode args = do
       user <-
         if mine
-        then
-          if server == brc
-          then do
-            mail <- getRhBzUser
-            return [ArgParameter "assigned_to" Equals mail]
-          else
-            error' "--mine and --server currently not supported together"
+        then do
+          mail <- getRhBzUser
+          return [ArgParameter "assigned_to" Equals mail]
         else return []
       let argtypes = mapMaybe readBzQueryArg args
           url =
