@@ -1,5 +1,9 @@
 # rhbzquery releases
 
+## 0.4.2 (2021-01-08)
+- add --query command
+- add --server option
+
 ## 0.4.1 (2020-12-17)
 - set no stdout buffering (reported by @clrkwllms)
 - change license from BSD3 to GPLv2+ and add SPDX tags

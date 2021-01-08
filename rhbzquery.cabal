@@ -1,5 +1,5 @@
 name:                rhbzquery
-version:             0.4.1
+version:             0.4.2
 synopsis:            Bugzilla query tool
 description:
         A CLI tool for creating bugzilla queries for bugzilla.redhat.com.
@@ -16,7 +16,7 @@ extra-doc-files:     ChangeLog.md
                      README.md
                      TODO
 cabal-version:       1.18
-tested-with:         GHC == 8.4.4, GHC == 8.6.5, GHC == 8.8.4, GHC == 8.10.2
+tested-with:         GHC == 8.4.4, GHC == 8.6.5, GHC == 8.8.4, GHC == 8.10.3
 
 source-repository head
   type:                git

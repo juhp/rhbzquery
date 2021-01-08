@@ -10,11 +10,11 @@ rhbzquery is distributed under the GPL license version 2 or later.
 
 ## Usage examples
 
-`rhbzquery f33 xyz` : F33 bugs for package xyz
+`rhbzquery f33 xyz` : Fedora 33 bugs for package xyz
 
 `rhbzquery closed rawhide xyz` : closed rawhide bugs for package xyz
 
-`rhbzquery --mine` : your open bugs (gets userid from `.bugzillarc`)
+`rhbzquery --mine` : your open bugs (gets userid from `~/.bugzillarc`)
 
 `rhbzquery rhel8.3 bash` : RHEL 8.3 bash bugs
 
@@ -25,6 +25,8 @@ rhbzquery is distributed under the GPL license version 2 or later.
 `rhbzquery component~bugzilla summary~bugzilla` : open bugs with component and summary containing "bugzilla"
 
 `rhbzquery --file f33 xyz` : file a bug against the xyz package in F33
+
+`rhbzquery --query rhel8 ...`: open an advanced bugzilla search for RHEL 8
 
 ### Help
 `rhbzquery --help` describes arguments
