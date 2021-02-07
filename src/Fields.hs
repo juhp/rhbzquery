@@ -77,7 +77,7 @@ productVersionQuery (Fedora (Just n)) = [(BzProduct, "Fedora")
                                         ,(BzVersion, show n)]
 productVersionQuery (EPEL Nothing) = [(BzProduct, "Fedora EPEL")]
 productVersionQuery (EPEL (Just n)) = [(BzProduct, "Fedora EPEL")
-                                      ,(BzVersion, show n)]
+                                      ,(BzVersion, "epel" ++ show n)]
 productVersionQuery (RHEL ver) =
   case versionBranch ver of
     [] -> error' "Can't search RHEL without version"
