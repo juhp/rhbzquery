@@ -1,5 +1,10 @@
 # rhbzquery releases
 
+## 0.4.3 (2021-02-15)
+- support status with '<STATE' and '>STATE'
+- Bugzilla uses 'notequals' (not 'notequal')
+- fix missing EPEL version prefix
+
 ## 0.4.2 (2021-01-08)
 - add --query command
 - add --server option

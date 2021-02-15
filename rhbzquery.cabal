@@ -1,5 +1,5 @@
 name:                rhbzquery
-version:             0.4.2
+version:             0.4.3
 synopsis:            Bugzilla query tool
 description:
         A CLI tool for creating bugzilla queries for bugzilla.redhat.com.
@@ -7,7 +7,7 @@ license:             GPL-2
 license-file:        LICENSE
 author:              Jens Petersen <petersen@redhat.com>
 maintainer:          Jens Petersen <petersen@redhat.com>
-copyright:           2020  Jens Petersen <petersen@redhat.com>
+copyright:           2020-2021  Jens Petersen <petersen@redhat.com>
 category:            Utils
 homepage:            https://github.com/juhp/rhbzquery
 bug-reports:         https://github.com/juhp/rhbzquery/issues
