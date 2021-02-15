@@ -98,6 +98,8 @@ opData IsNotEmpty = OpNull "~notempty~" "is not empty"
 
 data ArgType = ArgProdVer ProductVersion
              | ArgStatusAll
+             | ArgStatusBefore String
+             | ArgStatusAfter String
              | ArgParameter String Operator String
              | ArgParameterEmpty String Bool
              | ArgComponent String
@@ -128,11 +130,12 @@ statusList = ["NEW", "ASSIGNED", "POST", "MODIFIED", "ON_QA", "VERIFIED", "RELEA
 
 parseStatus :: String -> Maybe ArgType
 parseStatus s =
-  let caps = upper s in
-    if caps == "ALL"
-    then Just ArgStatusAll
-    else
-      ArgParameter "bug_status" Equals <$> find (== upper s) statusList
+  case upper s of
+    "" -> error' "malformed status string"
+    "ALL" -> Just ArgStatusAll
+    ('<':st) -> ArgStatusBefore <$> find (== st) statusList
+    ('>':st) -> ArgStatusAfter <$> find (== st) statusList
+    caps -> ArgParameter "bug_status" Equals <$> find (== caps) statusList
 
 parseField :: String -> Maybe ArgType
 parseField ps =

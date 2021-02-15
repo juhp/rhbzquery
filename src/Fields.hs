@@ -13,7 +13,8 @@ import Data.Version
 import Numeric.Natural
 
 import Common
-import ParseArg (ArgType(..), Operator(..), ProductVersion(..), showOp)
+import ParseArg (ArgType(..), Operator(..), ProductVersion(..), showOp,
+                 statusList)
 
 data BzFields = BzProduct
               | BzVersion
@@ -45,7 +46,9 @@ argToFields :: Natural -> ArgType -> (Natural,[(BzFields,String)])
 argToFields i arg =
   case arg of
     ArgProdVer prodver -> (i,productVersionQuery prodver)
-    ArgStatusAll  -> (i,[])
+    ArgStatusAll -> (i,[])
+    ArgStatusBefore st -> (i, [(BzParameter "bug_status", s) | s <- takeWhile (/= st) statusList])
+    ArgStatusAfter st -> (i, [(BzParameter "bug_status", s) | s <- (tail . dropWhile (/= st)) statusList])
     ArgParameter p op v ->
       let param = mapField p
           val = if p == "sst"

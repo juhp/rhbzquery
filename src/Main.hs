@@ -99,6 +99,8 @@ main = do
     hasStatusSet :: [ArgType] -> Bool
     hasStatusSet [] = False
     hasStatusSet (ArgStatusAll:_) = True
+    hasStatusSet ((ArgStatusBefore _):_) = True
+    hasStatusSet ((ArgStatusAfter _):_) = True
     hasStatusSet ((ArgParameter "bug_status" _ _):_) = True
     hasStatusSet ((ArgParameter "status" _ _):_) = True
     hasStatusSet (_:rest) = hasStatusSet rest

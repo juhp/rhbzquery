@@ -28,6 +28,8 @@ rhbzquery is distributed under the GPL license version 2 or later.
 
 `rhbzquery --query rhel8 ...`: open an advanced bugzilla search for RHEL 8
 
+`rhbzquery xyz '<modified'`: xyz bugs not yet in MODIFIED or ON_QA, etc.
+
 ### Help
 `rhbzquery --help` describes arguments
 
