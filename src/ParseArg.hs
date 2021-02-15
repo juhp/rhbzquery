@@ -24,7 +24,7 @@ import Common
 argHelp :: String
 argHelp = "[COMPONENT|STATUS|PRODUCTVERSION|FIELD=VALUE|FIELDopVALUE]..."
 
-data Operator = Equals | NotEqual
+data Operator = Equals | NotEquals
               | Substring | NotSubstring
               | Regexp |NotRegexp
               | CaseSubstring
@@ -77,7 +77,7 @@ instance Ord OperatorData where
 opData :: Operator -> OperatorData
 opData NoOp = OpNull "~noop~" "ignore (comment out query field)"
 opData Equals = OpUnary "=" "is equal to"
-opData NotEqual = OpUnary "!=" "is not equal to"
+opData NotEquals = OpUnary "!=" "is not equal to"
 opData AnyExact = OpUnary "~anyexact=" "is equal to any of the strings"
 opData Substring = OpUnary "~" "contains the string"
 opData NotSubstring = OpUnary "!~" "does not contain the string"
