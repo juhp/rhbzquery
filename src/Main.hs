@@ -11,6 +11,7 @@ import Control.Applicative ((<|>))
 import Control.Monad.Extra
 import Data.Bifunctor
 import qualified Data.ByteString.Char8 as B
+import Data.List.Extra
 import Data.Maybe
 #if !MIN_VERSION_base(4,11,0)
 import Data.Monoid ((<>))
@@ -36,7 +37,7 @@ import Paths_rhbzquery
 import User
 
 data QueryMode = BugList | ListFields | ListOperators | CreateBug
-               | QueryPage | APIQuery
+               | QueryPage | APIQuery | Reverse
   deriving Eq
 
 main :: IO ()
@@ -51,7 +52,9 @@ main = do
      flagWith' ListOperators 'o' "list-operators" "List op search operator types" <|>
      flagWith' CreateBug 'f' "file" "File a bug" <|>
      flagWith' QueryPage 'q' "query" "Open advanced query page" <|>
+     flagWith' Reverse 'r' "reverse" "Convert url query to args" <|>
      flagWith BugList APIQuery 'w' "api" "Web API query") <*>
+    -- FIXME should really use some and many
     many (strArg argHelp)
   where
     run :: Bool -> Bool -> String -> QueryMode -> [String] -> IO ()
@@ -60,7 +63,18 @@ main = do
     run _ _ _ ListOperators _ =
       mapM_ putStrLn $ map showOpHelp operators ++
         ["", "content~ uses matches", "content!~ uses notmatches"]
-    -- FIXME should really use some and many
+    run _ _ _ Reverse [arg] =
+      let args = words $ map ampersandSpace $ removeURLPrefix arg
+      in putStrLn $ unwords $ map renderStatus (filter (not . ("list_id=" `isPrefixOf`)) args)
+      where
+        ampersandSpace c =
+          if c == '&' then ' ' else c
+        removeURLPrefix url =
+          if '?' `elem` url then tail (dropWhile (/= '?') url) else url
+        renderStatus s =
+          if "bug_status=" `isPrefixOf` s
+          then lower $ dropPrefix "bug_status=" s
+          else s
     run _ _ _ _ [] = error' "please give an argument or --help"
     run dryrun mine server mode args = do
       user <-
@@ -94,6 +108,7 @@ main = do
         QueryPage -> "query.cgi"
         ListFields -> "query.cgi" -- unused
         ListOperators -> "query.cgi" -- unused
+        Reverse -> "query.cgi" -- unused
       <> renderQuery True (bzQuery query)
 
     hasStatusSet :: [ArgType] -> Bool
