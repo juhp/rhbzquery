@@ -93,13 +93,15 @@ mapField :: String -> String
 mapField f =
   let longname =
         case f of
-          "itm" -> "cf_internal_target_milestone"
-          "itr" -> "cf_internal_target_release"
-          "status" -> "bug_status"
-          "sst" -> "agile_team.name"
-          "summary" -> "short_desc"
+          "arch" -> "rep_platform"
+          "platform" -> "rep_platform"
           "flag" -> "flagtypes.name"
           "flags" -> "flagtypes.name"
+          "itm" -> "cf_internal_target_milestone"
+          "itr" -> "cf_internal_target_release"
+          "sst" -> "agile_team.name"
+          "status" -> "bug_status"
+          "summary" -> "short_desc"
           p -> L.replace "-" "_" p
   in if longname `elem` ("format":allBzFields)
      then longname
