@@ -4,10 +4,12 @@ module Fields (
   allBzFields,
   BzFields(..),
   argToFields,
-  argToSimpleField
+  argToSimpleField,
+  fieldAliases
   )
 where
 
+import Data.Maybe
 import Data.List.Extra as L
 import Data.Version
 import Numeric.Natural
@@ -88,21 +90,24 @@ productVersionQuery (RHEL ver) =
     (major:_) ->  [(BzProduct, "Red Hat Enterprise Linux " ++ show major)
                   ,(BzVersion, showVersion ver)]
 
--- FIXME move map to allBzFields
+fieldAliases :: [(String,String)]
+fieldAliases =
+  [ ("arch", "rep_platform")
+  , ("platform", "rep_platform")
+  , ("flag", "flagtypes.name")
+  , ("flags", "flagtypes.name")
+  , ("itm", "cf_internal_target_milestone")
+  , ("itr", "cf_internal_target_release")
+  , ("sst", "agile_team.name")
+  , ("status", "bug_status")
+  , ("summary", "short_desc")
+  ]
+
 mapField :: String -> String
 mapField f =
   let longname =
-        case f of
-          "arch" -> "rep_platform"
-          "platform" -> "rep_platform"
-          "flag" -> "flagtypes.name"
-          "flags" -> "flagtypes.name"
-          "itm" -> "cf_internal_target_milestone"
-          "itr" -> "cf_internal_target_release"
-          "sst" -> "agile_team.name"
-          "status" -> "bug_status"
-          "summary" -> "short_desc"
-          p -> L.replace "-" "_" p
+        let norm = L.replace "-" "_" f
+        in fromMaybe norm $ lookup norm fieldAliases
   in if longname `elem` ("format":allBzFields)
      then longname
      else if "cf_" ++ longname `elem` allBzFields

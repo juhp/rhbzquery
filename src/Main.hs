@@ -59,7 +59,11 @@ main = do
   where
     run :: Bool -> Bool -> String -> QueryMode -> [String] -> IO ()
     -- FIXME list aliases
-    run _ _ _ ListFields _ = mapM_ putStrLn allBzFields
+    run _ _ _ ListFields _ = do
+      mapM_ putStrLn allBzFields
+      putStrLn $ "\nAliases: " ++ unwords (map fst fieldAliases)
+      putStrLn "Also cf_ prefix is optional"
+
     run _ _ _ ListOperators _ =
       mapM_ putStrLn $ map showOpHelp operators ++
         ["", "content~ uses matches", "content!~ uses notmatches"]
