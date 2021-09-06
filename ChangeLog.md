@@ -1,5 +1,10 @@
 # rhbzquery releases
 
+## 0.4.4 (2021-09-06)
+- experimental '--reverse' command: converts url to args
+- add 'arch'/'platform' aliases
+- '--list-fields' now prints field aliases too
+
 ## 0.4.3 (2021-02-15)
 - support status with '<STATE' and '>STATE'
 - Bugzilla uses 'notequals' (not 'notequal')
