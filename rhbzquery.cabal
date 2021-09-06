@@ -31,7 +31,7 @@ executable rhbzquery
                        ParseArg
                        Paths_rhbzquery
                        User
-  build-depends:       base <5
+  build-depends:       base >=4.8 && <5
                      , bytestring
                      , config-ini
                      , directory
