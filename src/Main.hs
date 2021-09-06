@@ -65,6 +65,7 @@ main = do
         ["", "content~ uses matches", "content!~ uses notmatches"]
     run _ _ _ Reverse [arg] =
       let args = words $ map ampersandSpace $ removeURLPrefix arg
+      -- FIXME drop component= and uses aliases (summary), etc
       in putStrLn $ unwords $ map renderStatus (filter (not . ("list_id=" `isPrefixOf`)) args)
       where
         ampersandSpace c =

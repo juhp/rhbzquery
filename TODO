@@ -3,3 +3,5 @@
 - cc=me, reporter=me
 - config file: for defining "my team" etc
 - --count bugs (no such api though)
+- query aliases
+- abbrev for Fedora Container Images
