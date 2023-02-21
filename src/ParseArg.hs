@@ -148,7 +148,10 @@ parseField ps =
         OpUnary op _ ->
           if op `isInfixOf` ps then
             case splitOn op ps of
-              (f:val) -> Just (ArgParameter f oper (intercalate op val))
+              (f:val) ->
+                if null f
+                then error' $ "cannot have empty parameter before " ++ show ps
+                else Just (ArgParameter f oper (intercalate op val))
               _ -> Nothing
           else Nothing
         OpNull op _ ->
