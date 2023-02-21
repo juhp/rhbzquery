@@ -106,7 +106,8 @@ data ArgType = ArgProdVer ProductVersion
 
 readBzQueryArg :: String -> Maybe ArgType
 readBzQueryArg s =
-  ArgProdVer <$> readProductVersion s <|>
+  ArgProdVer <$>
+  readProductVersion s <|>
   parseStatus s <|>
   parseField s <|>
   parseComponent s
