@@ -112,7 +112,7 @@ mapField f =
      then longname
      else if "cf_" ++ longname `elem` allBzFields
           then "cf_" ++ longname
-          else error' $ "unknown field: " ++ f
+          else error' $ "unknown field: " ++ show f
 
 -- https://bugzilla.redhat.com/query.cgi?query_format=advanced
 -- https://bugzilla.redhat.com/rest/field/bug
