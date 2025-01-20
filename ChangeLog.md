@@ -1,5 +1,11 @@
 # rhbzquery releases
 
+## 0.4.5 (2025-01-20)
+ Fields: quote unknown field
+ ParseArg parseField: error on empty parameter
+ User: use simple-prompt promptNonEmpty
+ Help: use ansi-wl-pprint for compatibility with recent optparse-applicative
+
 ## 0.4.4 (2021-09-06)
 - experimental '--reverse' command: converts url to args
 - add 'arch'/'platform' aliases

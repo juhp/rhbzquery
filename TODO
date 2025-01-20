@@ -5,3 +5,6 @@
 - --count bugs (no such api though)
 - query aliases
 - abbrev for Fedora Container Images
+- component regexp/glob?
+- map nobody to nobody@fedoraproject.org
+- list users?
