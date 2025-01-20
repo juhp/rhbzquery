@@ -9,7 +9,7 @@ import Data.List.Extra
 #if !MIN_VERSION_base(4,11,0)
 import Data.Monoid ((<>))
 #endif
-import qualified Options.Applicative.Help.Pretty as P
+import qualified Text.PrettyPrint.ANSI.Leijen as P
 
 import ParseArg (statusList)
 
