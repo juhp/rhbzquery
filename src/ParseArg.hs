@@ -100,6 +100,7 @@ data ArgType = ArgProdVer ProductVersion
              | ArgStatusAll
              | ArgStatusBefore String
              | ArgStatusAfter String
+             -- FIXME NonEmpty String
              | ArgParameter String Operator String
              | ArgParameterEmpty String Bool
              | ArgComponent String

@@ -21,6 +21,7 @@ import ParseArg (ArgType(..), Operator(..), ProductVersion(..), showOp,
 data BzFields = BzProduct
               | BzVersion
               | BzComponent
+              -- FIXME should be NonEmpty String
               | BzParameter String
               | BzMeta Char Natural
   deriving Eq
