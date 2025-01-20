@@ -15,6 +15,7 @@ import Data.Monoid ((<>))
 import Data.Ini.Config
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
+import SimplePrompt (promptNonEmpty)
 import System.Directory
 import System.Environment
 import System.FilePath
@@ -47,7 +48,7 @@ getRhBzUser = do
   case euser of
     Right user -> return user
     Left rc -> do
-      email <- prompt "Bugzilla Username"
+      email <- promptNonEmpty "Bugzilla Username"
       when (emailIsValid email) $ do
         writeFile rc $ "[" <> brc <> "]\nuser = " <> email <> "\n"
         putStrLn $ "Saved in " ++ rc
@@ -55,11 +56,3 @@ getRhBzUser = do
   where
     emailIsValid :: String -> Bool
     emailIsValid = Email.isValid . B.pack
-
-prompt :: String -> IO String
-prompt s = do
-  putStr $ s ++ ": "
-  inp <- getLine
-  if null inp
-    then prompt s
-    else return inp

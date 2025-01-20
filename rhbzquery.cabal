@@ -43,6 +43,7 @@ executable rhbzquery
                      , optparse-applicative
                      , simple-cmd
                      , simple-cmd-args
+                     , simple-prompt
                      , text
                      , ansi-wl-pprint
   hs-source-dirs:      src
