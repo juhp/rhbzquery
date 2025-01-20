@@ -1,3 +1,4 @@
+cabal-version:       1.24
 name:                rhbzquery
 version:             0.4.4
 synopsis:            Bugzilla query tool
@@ -15,8 +16,8 @@ build-type:          Simple
 extra-doc-files:     ChangeLog.md
                      README.md
                      TODO
-cabal-version:       1.18
-tested-with:         GHC == 8.4.4, GHC == 8.6.5, GHC == 8.8.4, GHC == 8.10.3
+tested-with:         GHC == 8.4.4, GHC == 8.6.5, GHC == 8.8.4, GHC == 8.10.7,
+                     GHC == 9.0.2, GHC == 9.2.8, GHC == 9.4.8, GHC == 9.6.6
 
 source-repository head
   type:                git
@@ -71,4 +72,4 @@ test-suite test
     ghc-options:   -Wall
     build-depends: base >= 4 && < 5
                  , simple-cmd
-    build-tools:   rhbzquery
+    build-tool-depends:   rhbzquery:rhbzquery
