@@ -13,6 +13,7 @@ import Data.Maybe
 import Data.List.Extra as L
 import Data.Version
 import Numeric.Natural
+import Safe (tailSafe)
 
 import Common
 import ParseArg (ArgType(..), Operator(..), ProductVersion(..), showOp,
@@ -51,7 +52,7 @@ argToFields i arg =
     ArgProdVer prodver -> (i,productVersionQuery prodver)
     ArgStatusAll -> (i,[])
     ArgStatusBefore st -> (i, [(BzParameter "bug_status", s) | s <- takeWhile (/= st) statusList])
-    ArgStatusAfter st -> (i, [(BzParameter "bug_status", s) | s <- (tail . dropWhile (/= st)) statusList])
+    ArgStatusAfter st -> (i, [(BzParameter "bug_status", s) | s <- (tailSafe . dropWhile (/= st)) statusList])
     ArgParameter p op v ->
       let param = mapField p
           val = if p == "sst"

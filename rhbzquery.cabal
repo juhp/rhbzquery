@@ -41,6 +41,7 @@ executable rhbzquery
                      , filepath
                      , http-types
                      , optparse-applicative
+                     , safe
                      , simple-cmd
                      , simple-cmd-args
                      , simple-prompt

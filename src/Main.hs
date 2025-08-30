@@ -34,6 +34,7 @@ import Fields
 import Help
 import ParseArg
 import Paths_rhbzquery
+import Safe (tailSafe)
 import User
 
 data QueryMode = BugList | ListFields | ListOperators | CreateBug
@@ -74,7 +75,7 @@ main = do
         ampersandSpace c =
           if c == '&' then ' ' else c
         removeURLPrefix url =
-          if '?' `elem` url then tail (dropWhile (/= '?') url) else url
+          if '?' `elem` url then tailSafe (dropWhile (/= '?') url) else url
         renderStatus s =
           if "bug_status=" `isPrefixOf` s
           then lower $ dropPrefix "bug_status=" s
