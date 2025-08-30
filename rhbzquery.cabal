@@ -46,7 +46,6 @@ executable rhbzquery
                      , simple-cmd-args
                      , simple-prompt
                      , text
-                     , ansi-wl-pprint
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:         -Wall
